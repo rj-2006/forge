@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { cn } from '../../lib/utils'
+import { cn, resolveAssetUrl } from '../../lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import type { Thread } from '../../types/api'
 import { ReactionButton } from './reaction-button'
@@ -77,7 +77,7 @@ export function ThreadCard({
           </div>
 
           {/* Title */}
-          <Link to={`/threads/${thread.id}`}>
+          <Link to={`/app/forum/threads/${thread.id}`}>
             <h2 className="mt-1 text-lg font-semibold hover:text-primary transition-colors">
               {thread.title}
             </h2>
@@ -102,7 +102,7 @@ export function ThreadCard({
                   )}
                 >
                   <img
-                    src={image.url}
+                    src={resolveAssetUrl(image.url)}
                     alt={image.caption || ''}
                     className="h-full w-full object-cover"
                   />
@@ -126,7 +126,7 @@ export function ThreadCard({
             />
 
             <Link
-              to={`/threads/${thread.id}`}
+              to={`/app/forum/threads/${thread.id}`}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
               <svg

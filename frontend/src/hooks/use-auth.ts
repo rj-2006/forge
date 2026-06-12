@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth-store'
 import type { LoginRequest, RegisterRequest } from '../types/api'
 
 export function useCurrentUser() {
-  const { isAuthenticated, setLoading } = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
 
   return useQuery({
     queryKey: queryKeys.auth.user(),

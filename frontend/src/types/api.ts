@@ -93,12 +93,75 @@ export interface MessageReaction {
   created_at: string
 }
 
-export interface CustomEmoji {
+// ── Club Homepage Types ──
+
+export interface ClubConfig {
   id: number
   name: string
-  url: string
-  created_by: number
+  tagline: string
+  description: string
+  logo_url: string
+  hero_image_url: string
+  social_links: string // JSON string
+  founding_year: number
+  contact_email: string
   created_at: string
+  updated_at: string
+}
+
+export interface TeamMember {
+  id: number
+  name: string
+  role: string
+  bio: string
+  avatar_url: string
+  social_links: string // JSON string
+  display_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface Event {
+  id: number
+  title: string
+  description: string
+  date: string
+  end_date?: string
+  location: string
+  event_type: 'workshop' | 'meetup' | 'hackathon' | 'talk'
+  status: 'upcoming' | 'ongoing' | 'completed'
+  image_url: string
+  registration_link: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Announcement {
+  id: number
+  title: string
+  content: string
+  priority: 'normal' | 'high' | 'urgent'
+  is_pinned: boolean
+  author_id: number
+  author: User
+  expires_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface HomepageStats {
+  total_members: number
+  total_threads: number
+  total_chatrooms: number
+  total_events: number
+}
+
+export interface HomepageData {
+  club: ClubConfig
+  team: TeamMember[]
+  events: Event[]
+  announcements: Announcement[]
+  stats: HomepageStats
 }
 
 export interface ApiError {
@@ -114,3 +177,4 @@ export interface PaginatedResponse<T> {
   limit: number
   hasMore: boolean
 }
+

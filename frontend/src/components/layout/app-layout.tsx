@@ -1,9 +1,11 @@
-import * as React from "react"
-import { Outlet, useNavigate } from "react-router-dom"
-import { cn } from "../../lib/utils"
-import { Sidebar } from "./sidebar"
-import { TopNavbar } from "./top-navbar"
-import { useAuthStore } from "../../stores/auth-store"
+import * as React from 'react'
+import { Bell, Menu } from 'lucide-react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { Button } from '../ui/button'
+import { cn } from '../../lib/utils'
+import { useAuthStore } from '../../stores/auth-store'
+import { Sidebar } from './sidebar'
+import { TopNavbar } from './top-navbar'
 
 const HomeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,11 +27,11 @@ const ChatIcon = () => (
 
 const defaultNavSections = [
   {
-    title: "Menu",
+    title: 'Workspace',
     items: [
-      { label: "Home", href: "/", icon: <HomeIcon /> },
-      { label: "Forum", href: "/", icon: <ForumIcon /> },
-      { label: "Chat", href: "/chat", icon: <ChatIcon /> },
+      { label: 'Home', href: '/', icon: <HomeIcon /> },
+      { label: 'Forum', href: '/app/forum', icon: <ForumIcon /> },
+      { label: 'Chat', href: '/app/chat', icon: <ChatIcon /> },
     ],
   },
 ]
@@ -43,12 +45,11 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
 
   const handleLogout = () => {
     logout()
-    navigate("/login")
+    navigate('/login')
   }
 
   return (
-    <div className={cn("flex h-screen w-full bg-background", className)}>
-      {/* Desktop Sidebar */}
+    <div className={cn('flex h-screen w-full bg-background', className)}>
       <div className="hidden lg:block">
         <Sidebar
           collapsed={sidebarCollapsed}
@@ -57,7 +58,6 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
         />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <>
           <div
@@ -74,62 +74,40 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
         </>
       )}
 
-      {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top Navbar */}
         <TopNavbar>
-          {/* Mobile Menu Button */}
-          <button
+          <Button
             onClick={() => setMobileMenuOpen(true)}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-md",
-              "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              "lg:hidden"
-            )}
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+            <Menu className="h-5 w-5" />
+          </Button>
 
-          <TopNavbar.Search placeholder="Search..." />
+          <TopNavbar.Brand className="min-w-0">
+            <div className="hidden min-w-0 lg:block">
+              <p className="truncate text-sm font-semibold tracking-tight">TechTalk Workspace</p>
+              <p className="truncate text-xs text-muted-foreground">Forum, chat, and projects in one place</p>
+            </div>
+          </TopNavbar.Brand>
+
+          <TopNavbar.Search placeholder="Search discussions" className="ml-auto" />
 
           <TopNavbar.Content>
-            <TopNavbar.Action>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
+            <TopNavbar.Action label="Notifications">
+              <Bell className="h-4 w-4" />
             </TopNavbar.Action>
             <TopNavbar.User 
               name={user?.username || "User"} 
+              email={user?.email}
+              avatar={user?.avatar}
               onClick={handleLogout}
             />
           </TopNavbar.Content>
         </TopNavbar>
 
-        {/* Page Content */}
         <div className="flex flex-1 overflow-hidden">
           {children || <Outlet />}
         </div>
@@ -148,7 +126,6 @@ export function AuthLayout({ children, className }: { children: React.ReactNode;
       )}
     >
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">

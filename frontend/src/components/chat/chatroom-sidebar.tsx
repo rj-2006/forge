@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 import type { Chatroom } from '../../types/api'
 import { Button } from '../ui/button'
@@ -23,7 +23,6 @@ export function ChatroomSidebar({
   isCreating,
   className,
 }: ChatroomSidebarProps) {
-  const location = useLocation()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newChatroomName, setNewChatroomName] = useState('')
 
@@ -99,7 +98,7 @@ export function ChatroomSidebar({
             chatrooms.map((chatroom) => (
               <Link
                 key={chatroom.id}
-                to={`/chat/${chatroom.id}`}
+                to={`/app/chat/${chatroom.id}`}
                 className={cn(
                   'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
                   currentChatroomId === chatroom.id

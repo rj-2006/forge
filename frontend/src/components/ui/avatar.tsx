@@ -1,3 +1,5 @@
+import * as React from 'react'
+import * as AvatarPrimitive from '@radix-ui/react-avatar'
 import { cn } from '../../lib/utils'
 
 interface AvatarProps {
@@ -17,34 +19,28 @@ const avatarSizes = {
 }
 
 export function Avatar({ src, alt, fallback, size = 'md', className }: AvatarProps) {
-  const [error, setError] = React.useState(false)
-
-  if (!src || error) {
-    return (
-      <div
-        className={cn(
-          'flex items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
-          avatarSizes[size],
-          className
-        )}
-        aria-label={alt || 'User avatar'}
+  return (
+    <AvatarPrimitive.Root
+      className={cn(
+        'relative flex shrink-0 overflow-hidden rounded-full bg-primary text-primary-foreground',
+        avatarSizes[size],
+        className,
+      )}
+    >
+      {src ? (
+        <AvatarPrimitive.Image
+          src={src}
+          alt={alt || 'User avatar'}
+          className="aspect-square h-full w-full object-cover"
+        />
+      ) : null}
+      <AvatarPrimitive.Fallback
+        className="flex h-full w-full items-center justify-center font-medium"
+        delayMs={200}
       >
         {fallback?.charAt(0)?.toUpperCase() || '?'}
-      </div>
-    )
-  }
-
-  return (
-    <img
-      src={src}
-      alt={alt || 'User avatar'}
-      className={cn(
-        'rounded-full object-cover',
-        avatarSizes[size],
-        className
-      )}
-      onError={() => setError(true)}
-    />
+      </AvatarPrimitive.Fallback>
+    </AvatarPrimitive.Root>
   )
 }
 

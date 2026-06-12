@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 export function NavigationLoader() {
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
-  const timeoutRef = useRef<number>()
+  const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     setIsLoading(true)

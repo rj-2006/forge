@@ -6,7 +6,7 @@ import { useAuthStore } from '../../stores/auth-store'
 import { PageContainer, PageContent } from '../../components/layout/page-container'
 import { Button } from '../../components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
-import { cn } from '../../lib/utils'
+import { cn, resolveAssetUrl } from '../../lib/utils'
 import { ReactionButton } from '../../components/forum/reaction-button'
 import { ThreadDetailSkeleton } from '../../components/forum/thread-skeleton'
 import { EmptyState } from '../../components/layout/protected-route'
@@ -131,7 +131,7 @@ export function ThreadDetailPage() {
                 {thread.images.map((image, index) => (
                   <img
                     key={image.id || index}
-                    src={image.url}
+                    src={resolveAssetUrl(image.url)}
                     alt={image.caption || ''}
                     className={cn(
                       'rounded-md object-cover',

@@ -1,6 +1,9 @@
-import * as React from "react"
-import { Link } from "react-router-dom"
-import { cn } from "../../lib/utils"
+import * as React from 'react'
+import { Bell, LogOut, Search } from 'lucide-react'
+import { Avatar } from '../ui/avatar'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { cn, resolveAssetUrl } from '../../lib/utils'
 
 interface TopNavbarProps {
   className?: string
@@ -11,8 +14,8 @@ export function TopNavbar({ className, children }: TopNavbarProps) {
   return (
     <header
       className={cn(
-        "flex h-14 items-center gap-4 border-b bg-card px-4 lg:px-6",
-        className
+        'sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border/70 bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:px-6',
+        className,
       )}
     >
       {children}
@@ -26,11 +29,7 @@ interface TopNavbarBrandProps {
 }
 
 export function TopNavbarBrand({ className, children }: TopNavbarBrandProps) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('flex items-center gap-2', className)}>{children}</div>
 }
 
 interface TopNavbarContentProps {
@@ -39,11 +38,7 @@ interface TopNavbarContentProps {
 }
 
 export function TopNavbarContent({ className, children }: TopNavbarContentProps) {
-  return (
-    <div className={cn("flex flex-1 items-center justify-end gap-2", className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('flex flex-1 items-center justify-end gap-2', className)}>{children}</div>
 }
 
 interface TopNavbarSearchProps {
@@ -55,38 +50,19 @@ interface TopNavbarSearchProps {
 
 export function TopNavbarSearch({
   className,
-  placeholder = "Search...",
+  placeholder = 'Search...',
   value,
   onChange,
 }: TopNavbarSearchProps) {
   return (
-    <div className={cn("relative", className)}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
+    <div className={cn('relative hidden w-full max-w-sm lg:block', className)}>
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
         type="search"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className={cn(
-          "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-9",
-          "text-sm shadow-sm transition-colors",
-          "placeholder:text-muted-foreground",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-          "disabled:cursor-not-allowed disabled:opacity-50"
-        )}
+        className="h-10 border-border/70 bg-muted/40 pl-9 shadow-none"
       />
     </div>
   )
@@ -96,7 +72,7 @@ interface TopNavbarActionProps {
   className?: string
   children?: React.ReactNode
   onClick?: () => void
-  asChild?: boolean
+  label?: string
 }
 
 export function TopNavbarAction({
@@ -104,20 +80,18 @@ export function TopNavbarAction({
   children,
   onClick,
   label,
-}: TopNavbarActionProps & { label?: string }) {
+}: TopNavbarActionProps) {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-md",
-        "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-        "transition-colors",
-        className
-      )}
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={cn('h-9 w-9 text-muted-foreground', className)}
       aria-label={label}
     >
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -137,35 +111,27 @@ export function TopNavbarUser({
   onClick,
 }: TopNavbarUserProps) {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 rounded-md px-2 py-1.5",
-        "hover:bg-accent transition-colors",
-        className
-      )}
+      type="button"
+      variant="ghost"
+      className={cn('h-auto gap-3 rounded-xl px-2 py-2', className)}
       aria-label={onClick ? `User menu: ${name}` : undefined}
     >
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-        {avatar ? (
-          <img
-            src={avatar}
-            alt=""
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : (
-          <span className="text-sm font-medium text-primary-foreground" aria-hidden="true">
-            {name?.charAt(0)?.toUpperCase() || "U"}
-          </span>
-        )}
-      </div>
-      <div className="hidden flex-col items-start text-left text-sm lg:flex">
+      <Avatar
+        src={resolveAssetUrl(avatar)}
+        alt={name || 'User avatar'}
+        fallback={name}
+        size="sm"
+      />
+      <div className="hidden min-w-0 flex-col items-start text-left text-sm lg:flex">
         <span className="font-medium">{name}</span>
         {email && (
           <span className="text-xs text-muted-foreground">{email}</span>
         )}
       </div>
-    </button>
+      {onClick ? <LogOut className="hidden h-4 w-4 text-muted-foreground lg:block" /> : null}
+    </Button>
   )
 }
 
@@ -174,3 +140,11 @@ TopNavbar.Content = TopNavbarContent
 TopNavbar.Search = TopNavbarSearch
 TopNavbar.Action = TopNavbarAction
 TopNavbar.User = TopNavbarUser
+
+export function TopNavbarNotifications({ className }: { className?: string }) {
+  return (
+    <TopNavbarAction className={className} label="Notifications">
+      <Bell className="h-4 w-4" />
+    </TopNavbarAction>
+  )
+}

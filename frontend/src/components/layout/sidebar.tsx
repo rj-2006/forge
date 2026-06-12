@@ -1,8 +1,10 @@
-import * as React from "react"
-import { Link, useLocation } from "react-router-dom"
-import { cn } from "../../lib/utils"
-import { ScrollArea } from "../ui/scroll-area"
-import { Separator } from "../ui/separator"
+import * as React from 'react'
+import { ChevronLeft } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Button } from '../ui/button'
+import { ScrollArea } from '../ui/scroll-area'
+import { Separator } from '../ui/separator'
+import { cn } from '../../lib/utils'
 
 interface NavItem {
   label: string
@@ -34,15 +36,22 @@ function SidebarItem({ item, collapsed, active }: SidebarItemProps) {
     <Link
       to={item.href}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
-        collapsed && "justify-center px-2"
+        'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+        active
+          ? 'bg-primary/10 text-foreground ring-1 ring-primary/15'
+          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+        collapsed && 'justify-center px-2',
       )}
       title={collapsed ? item.label : undefined}
       aria-current={active ? 'page' : undefined}
     >
-      <span className={cn("flex-shrink-0", collapsed ? "h-5 w-5" : "h-5 w-5")} aria-hidden="true">
+      <span
+        className={cn(
+          'flex h-5 w-5 shrink-0 items-center justify-center',
+          active ? 'text-primary' : 'text-current',
+        )}
+        aria-hidden="true"
+      >
         {item.icon}
       </span>
       {!collapsed && (
@@ -70,31 +79,34 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex flex-col border-r bg-card transition-all duration-200",
-        collapsed ? "w-[72px]" : "w-[260px]",
-        className
+        'flex flex-col border-r border-border/70 bg-card/70 backdrop-blur transition-all duration-200',
+        collapsed ? 'w-[80px]' : 'w-[280px]',
+        className,
       )}
     >
-      {/* Logo / Brand */}
-      <div className={cn(
-        "flex h-14 items-center border-b px-4",
-        collapsed ? "justify-center" : "gap-2"
-      )}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <span className="text-lg font-bold text-primary-foreground">T</span>
+      <div
+        className={cn(
+          'flex h-16 items-center border-b border-border/70 px-4',
+          collapsed ? 'justify-center' : 'gap-3',
+        )}
+      >
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
+          T
         </div>
         {!collapsed && (
-          <span className="text-lg font-semibold">TechTalk</span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold tracking-tight">TechTalk</p>
+            <p className="text-xs text-muted-foreground">Club workspace</p>
+          </div>
         )}
       </div>
 
-      {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="flex flex-col gap-6">
           {navSections.map((section, sectionIndex) => (
             <div key={section.title || sectionIndex}>
               {section.title && !collapsed && (
-                <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   {section.title}
                 </h3>
               )}
@@ -119,34 +131,24 @@ export function Sidebar({
       {/* Collapse Toggle */}
       {onCollapsedChange && (
         <div className="border-t p-3">
-          <button
+          <Button
             onClick={() => onCollapsedChange(!collapsed)}
+            type="button"
+            variant="ghost"
             className={cn(
-              "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium",
-              "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              collapsed && "justify-center px-2"
+              'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground',
+              collapsed && 'justify-center px-2',
             )}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
+            <ChevronLeft
               className={cn(
-                "h-5 w-5 transition-transform",
-                collapsed && "rotate-180"
+                'h-4 w-4 transition-transform',
+                collapsed && 'rotate-180',
               )}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-              />
-            </svg>
+            />
             {!collapsed && <span>Collapse</span>}
-          </button>
+          </Button>
         </div>
       )}
     </aside>

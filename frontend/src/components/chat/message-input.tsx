@@ -18,7 +18,7 @@ export function MessageInput({
   className,
 }: MessageInputProps) {
   const [content, setContent] = useState('')
-  const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isTypingRef = useRef(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,7 +29,9 @@ export function MessageInput({
     setContent('')
     
     if (isTypingRef.current) {
-      clearTimeout(typingTimeoutRef.current)
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
       isTypingRef.current = false
     }
   }
@@ -43,7 +45,9 @@ export function MessageInput({
         onTyping()
       }
       
-      clearTimeout(typingTimeoutRef.current)
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
       typingTimeoutRef.current = setTimeout(() => {
         isTypingRef.current = false
       }, 2000)
@@ -52,7 +56,9 @@ export function MessageInput({
 
   useEffect(() => {
     return () => {
-      clearTimeout(typingTimeoutRef.current)
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
     }
   }, [])
 

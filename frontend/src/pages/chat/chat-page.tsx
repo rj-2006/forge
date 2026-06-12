@@ -76,9 +76,7 @@ export function ChatPage() {
 
   useEffect(() => {
     if (!chatroomId) return
-    
-    setMessages([])
-    
+
     const timer = setTimeout(() => {
       joinRoom()
     }, 100)
@@ -110,7 +108,7 @@ export function ChatPage() {
   const currentChatroom = chatrooms?.find((c) => c.id === chatroomId)
 
   return (
-    <PageContainer className="flex!">
+    <PageContainer className="flex min-h-0 overflow-hidden">
       <ChatroomSidebar
         chatrooms={chatrooms || []}
         currentChatroomId={chatroomId}
@@ -119,7 +117,7 @@ export function ChatPage() {
         isCreating={createChatroom.isPending}
       />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {chatroomId ? (
           <>
             {/* Chat Header */}
@@ -154,7 +152,7 @@ export function ChatPage() {
               <MessageList
                 messages={messages}
                 currentUserId={userId}
-                className="flex-1"
+                className="min-h-0 flex-1"
               />
             )}
 

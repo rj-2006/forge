@@ -1,5 +1,5 @@
 import { api } from '../lib/api-client'
-import type { Thread, Post, ThreadReaction, ChatMessage, CustomEmoji, Chatroom } from '../types/api'
+import type { Thread, Post, ThreadReaction, ChatMessage, Chatroom } from '../types/api'
 
 export const threadService = {
   async getThreads(params?: {
@@ -89,26 +89,5 @@ export const chatService = {
     description?: string
   }): Promise<Chatroom> {
     return api.post('/api/chatrooms', data)
-  },
-}
-
-export const emojiService = {
-  async getCustomEmojis(): Promise<CustomEmoji[]> {
-    return api.get('/api/emojis')
-  },
-
-  async createEmoji(data: {
-    name: string
-    file: File
-  }): Promise<CustomEmoji> {
-    const formData = new FormData()
-    formData.append('name', data.name)
-    formData.append('image', data.file)
-    const response = await api.postForm<{ message: string; emoji: CustomEmoji }>('/api/emojis', formData)
-    return response.emoji
-  },
-
-  async deleteEmoji(id: number): Promise<void> {
-    return api.delete(`/api/emojis/${id}`)
   },
 }
