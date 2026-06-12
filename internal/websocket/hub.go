@@ -1,10 +1,6 @@
 package websocket
 
-import (
-	"encoding/json"
-	"log"
-	"sync"
-)
+import "sync"
 
 type BroadcastMessage struct {
 	RoomID  string
@@ -44,8 +40,6 @@ func (h *Hub) Run() {
 			h.Rooms[client.RoomID][client] = true
 			h.mu.Unlock()
 
-			log.Printf("Client %s joined room %s", client.Username, client.RoomID)
-
 			h.notifyJoin(client)
 
 		case client := <-h.Unregister:
@@ -62,7 +56,6 @@ func (h *Hub) Run() {
 			}
 			h.mu.Unlock()
 
-			log.Printf("Client %s left room %s", client.Username, client.RoomID)
 			h.notifyLeave(client)
 
 		case broadcastMsg := <-h.Broadcast:
@@ -85,29 +78,28 @@ func (h *Hub) Run() {
 }
 
 func (h *Hub) notifyJoin(client *Client) {
-	msg := Event{
-		Type: EventTypeUserJoined,
-		Payload: TypingMessage{
-			UserID:   client.UserID,
-			Username: client.Username,
-		},
+	data, err := NewEvent(EventTypeUserJoined, TypingMessage{
+		UserID:   client.UserID,
+		Username: client.Username,
+	})
+	if err != nil {
+		return
 	}
-	h.broadcastToRoom(client.RoomID, msg)
+	h.broadcastToRoom(client.RoomID, data)
 }
 
 func (h *Hub) notifyLeave(client *Client) {
-	msg := Event{
-		Type: EventTypeUserLeft,
-		Payload: TypingMessage{
-			UserID:   client.UserID,
-			Username: client.Username,
-		},
+	data, err := NewEvent(EventTypeUserLeft, TypingMessage{
+		UserID:   client.UserID,
+		Username: client.Username,
+	})
+	if err != nil {
+		return
 	}
-	h.broadcastToRoom(client.RoomID, msg)
+	h.broadcastToRoom(client.RoomID, data)
 }
 
-func (h *Hub) broadcastToRoom(roomID string, msg Event) {
-	data, _ := json.Marshal(msg)
+func (h *Hub) broadcastToRoom(roomID string, data []byte) {
 	h.mu.RLock()
 	clients := h.Rooms[roomID]
 	h.mu.RUnlock()

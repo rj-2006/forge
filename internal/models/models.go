@@ -57,23 +57,6 @@ type ChatMessage struct {
 	Reactions  []MessageReaction `gorm:"foreignKey:MessageID" json:"reactions,omitempty"`
 }
 
-type GameRoom struct {
-	ID         uint      `gorm:"primaryKey" json:"id"`
-	Name       string    `gorm:"not null" json:"name"`
-	GameType   string    `gorm:"not null" json:"game_type"` // "smash_karts"
-	MaxPlayers int       `gorm:"default:8" json:"max_players"`
-	Status     string    `gorm:"default:'waiting'" json:"status"` // waiting, playing, finished
-	CreatedBy  uint      `gorm:"not null" json:"created_by"`
-	CreatedAt  time.Time `json:"created_at"`
-}
-
-type GameState struct {
-	ID         uint      `gorm:"primaryKey" json:"id"`
-	GameRoomID uint      `gorm:"not null;uniqueIndex" json:"game_room_id"`
-	StateData  string    `gorm:"type:jsonb" json:"state_data"` // JSON blob
-	UpdatedAt  time.Time `json:"updated_at"`
-}
-
 type ThreadImage struct {
 	ID       uint   `gorm:"primaryKey" json:"id"`
 	ThreadID uint   `gorm:"not null;index" json:"thread_id"`
@@ -105,4 +88,60 @@ type CustomEmoji struct {
 	URL       string    `gorm:"not null" json:"url"`
 	CreatedBy uint      `gorm:"not null" json:"created_by"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// ── Club Homepage Models ──
+
+type ClubConfig struct {
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	Name         string    `gorm:"not null" json:"name"`
+	Tagline      string    `json:"tagline"`
+	Description  string    `gorm:"type:text" json:"description"`
+	LogoURL      string    `json:"logo_url"`
+	HeroImageURL string    `json:"hero_image_url"`
+	SocialLinks  string    `gorm:"type:text" json:"social_links"` // JSON: {"github":"...","discord":"...","twitter":"...","instagram":"...","linkedin":"...","website":"..."}
+	FoundingYear int       `json:"founding_year"`
+	ContactEmail string    `json:"contact_email"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type TeamMember struct {
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	Name         string    `gorm:"not null" json:"name"`
+	Role         string    `gorm:"not null" json:"role"`
+	Bio          string    `gorm:"type:text" json:"bio"`
+	AvatarURL    string    `json:"avatar_url"`
+	SocialLinks  string    `gorm:"type:text" json:"social_links"` // JSON
+	DisplayOrder int       `gorm:"default:0" json:"display_order"`
+	IsActive     bool      `gorm:"default:true" json:"is_active"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type Event struct {
+	ID               uint      `gorm:"primaryKey" json:"id"`
+	Title            string    `gorm:"not null" json:"title"`
+	Description      string    `gorm:"type:text" json:"description"`
+	Date             time.Time `gorm:"not null" json:"date"`
+	EndDate          time.Time `json:"end_date,omitempty"`
+	Location         string    `json:"location"`
+	EventType        string    `gorm:"not null;default:'meetup'" json:"event_type"` // workshop, meetup, hackathon, talk
+	Status           string    `gorm:"not null;default:'upcoming'" json:"status"`   // upcoming, ongoing, completed
+	ImageURL         string    `json:"image_url"`
+	RegistrationLink string    `json:"registration_link"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+type Announcement struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Title     string    `gorm:"not null" json:"title"`
+	Content   string    `gorm:"type:text;not null" json:"content"`
+	Priority  string    `gorm:"not null;default:'normal'" json:"priority"` // normal, high, urgent
+	IsPinned  bool      `gorm:"default:false" json:"is_pinned"`
+	AuthorID  uint      `gorm:"not null" json:"author_id"`
+	Author    User      `gorm:"foreignKey:AuthorID" json:"author"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

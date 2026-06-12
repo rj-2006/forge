@@ -22,10 +22,7 @@ func issueToken(user models.User) (string, error) {
 		},
 	}
 
-	secret, err := middleware.JWTSecret()
-	if err != nil {
-		return "", err
-	}
+	secret := middleware.JWTSecret()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secret)

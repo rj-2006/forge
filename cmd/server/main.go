@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -19,6 +24,10 @@ func main() {
 		log.Println("No .env file found")
 	}
 
+	if err := middleware.InitJWT(); err != nil {
+		log.Fatal("JWT Secret configuration failed: ", err)
+	}
+
 	if err := database.Connect(
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
@@ -33,18 +42,25 @@ func main() {
 		log.Fatal("Migration failed: ", err)
 	}
 
+	database.SeedIfEnabled()
+
 	handlers.ChatHub = websocket.NewHub()
 	go handlers.ChatHub.Run()
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Logger(), gin.Recovery())
+	if err := r.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		log.Fatal("Failed to set trusted proxies:", err)
+	}
 
 	// CORS Middleware
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:5173",
-			"http://127.0.0.1:5173",
-			"http://localhost:4173",
-			"http://127.0.0.1:4173",
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "" ||
+				strings.HasPrefix(origin, "http://localhost:") ||
+				strings.HasPrefix(origin, "http://127.0.0.1:") ||
+				strings.HasPrefix(origin, "https://localhost:") ||
+				strings.HasPrefix(origin, "https://127.0.0.1:")
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
@@ -56,6 +72,7 @@ func main() {
 	// Public routes
 	r.POST("/api/register", handlers.Register)
 	r.POST("/api/login", handlers.Login)
+	r.GET("/api/homepage", handlers.GetHomepage)
 
 	// Protected routes
 	protected := r.Group("/api")
@@ -96,6 +113,32 @@ func main() {
 		port = "5070"
 	}
 
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
+	}
+
 	log.Printf("Starting server on port: %s", port)
-	r.Run(":" + port)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed: %s", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	// The context is used to inform the server it has 5 seconds to finish
+	// the request it is currently handling
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }

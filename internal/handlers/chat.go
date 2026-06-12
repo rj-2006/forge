@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -18,11 +20,31 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true
+		origin := r.Header.Get("Origin")
+		return isAllowedWebsocketOrigin(origin)
 	},
 }
 
 var ChatHub *ws.Hub
+
+func isAllowedWebsocketOrigin(origin string) bool {
+	if origin == "" {
+		return true
+	}
+
+	allowedOrigin := os.Getenv("APP_ORIGIN")
+	if allowedOrigin != "" && origin == allowedOrigin {
+		return true
+	}
+
+	parsedOrigin, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+
+	host := parsedOrigin.Hostname()
+	return host == "localhost" || host == "127.0.0.1"
+}
 
 func CreateChatroom(c *gin.Context) {
 	var req struct {
@@ -177,30 +199,30 @@ func handleChatMessages(client *ws.Client) {
 				continue
 			}
 
-			data, _ := json.Marshal(ws.Event{
-				Type: ws.EventTypeNewMessage,
-				Payload: ws.OutgoingChatMessage{
-					ID:         chatMessage.ID,
-					ChatroomID: chatMessage.ChatroomID,
-					UserID:     chatMessage.UserID,
-					User:       chatMessage.User,
-					Content:    chatMessage.Content,
-					CreatedAt:  chatMessage.CreatedAt.Format(time.RFC3339),
-					Reactions:  chatMessage.Reactions,
-				},
+			data, err := ws.NewEvent(ws.EventTypeNewMessage, ws.OutgoingChatMessage{
+				ID:         chatMessage.ID,
+				ChatroomID: chatMessage.ChatroomID,
+				UserID:     chatMessage.UserID,
+				User:       chatMessage.User,
+				Content:    chatMessage.Content,
+				CreatedAt:  chatMessage.CreatedAt.Format(time.RFC3339),
+				Reactions:  chatMessage.Reactions,
 			})
+			if err != nil {
+				continue
+			}
 			client.Hub.Broadcast <- &ws.BroadcastMessage{
 				RoomID:  client.RoomID,
 				Message: data,
 			}
 		case ws.MessageTypeTyping:
-			data, _ := json.Marshal(ws.Event{
-				Type: ws.MessageTypeTyping,
-				Payload: ws.TypingMessage{
-					UserID:   client.UserID,
-					Username: client.Username,
-				},
+			data, err := ws.NewEvent(ws.MessageTypeTyping, ws.TypingMessage{
+				UserID:   client.UserID,
+				Username: client.Username,
 			})
+			if err != nil {
+				continue
+			}
 			client.Hub.Broadcast <- &ws.BroadcastMessage{
 				RoomID:  client.RoomID,
 				Message: data,

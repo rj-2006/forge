@@ -33,12 +33,14 @@ func Migrate() error {
 		&models.Post{},
 		&models.Chatroom{},
 		&models.ChatMessage{},
-		&models.GameRoom{},
-		&models.GameState{},
 		&models.ThreadImage{},
 		&models.ThreadReaction{},
 		&models.MessageReaction{},
 		&models.CustomEmoji{},
+		&models.ClubConfig{},
+		&models.TeamMember{},
+		&models.Event{},
+		&models.Announcement{},
 	)
 
 	if err != nil {

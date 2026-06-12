@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -74,50 +73,19 @@ func GetThread(c *gin.Context) {
 		return
 	}
 
-	var thread models.Thread
-
-	// Use distinct queries to load related data
-	if err := database.DB.Preload("User").First(&thread, threadID).Error; err != nil {
+	thread, err := database.FetchThreadByID(uint(threadID))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Thread not found."})
 		return
 	}
-
-	// Load posts with user
-	database.DB.Where("thread_id = ?", threadID).Find(&thread.Posts)
-	for i := range thread.Posts {
-		database.DB.First(&thread.Posts[i].User, thread.Posts[i].UserID)
-	}
-
-	// Load reactions with user
-	database.DB.Where("thread_id = ?", threadID).Find(&thread.Reactions)
-	for i := range thread.Reactions {
-		database.DB.First(&thread.Reactions[i].User, thread.Reactions[i].UserID)
-	}
-
-	database.DB.Where("thread_id = ?", threadID).Find(&thread.Images)
-
-	log.Printf("=== GetThread: returning thread with %d reactions ===", len(thread.Reactions))
 
 	c.JSON(http.StatusOK, thread)
 }
 
 func GetThreads(c *gin.Context) {
-	var threads []models.Thread
-	query := database.DB.
-		Preload("User").
-		Preload("Posts").
-		Preload("Posts.User").
-		Preload("Images").
-		Preload("Reactions").
-		Preload("Reactions.User").
-		Order("created_at DESC")
-
 	search := c.Query("search")
-	if search != "" {
-		query = query.Where("title ILIKE ?", "%"+search+"%")
-	}
-
-	if err := query.Find(&threads).Error; err != nil {
+	threads, err := database.ListThreads(search)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
 		return
 	}

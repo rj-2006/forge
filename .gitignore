@@ -1,1 +1,7 @@
-.env 
+.env
+/techtalk
+/server
+/uploads/
+/frontend/node_modules/
+/frontend/dist/
+.agent/

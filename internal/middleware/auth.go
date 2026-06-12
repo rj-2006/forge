@@ -17,12 +17,19 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func JWTSecret() ([]byte, error) {
+var jwtSecret []byte
+
+func InitJWT() error {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		return nil, errors.New("JWT_SECRET is not configured")
+		return errors.New("JWT_SECRET environment variable is not configured")
 	}
-	return []byte(secret), nil
+	jwtSecret = []byte(secret)
+	return nil
+}
+
+func JWTSecret() []byte {
+	return jwtSecret
 }
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -45,12 +52,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		secret, err := JWTSecret()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Authentication is not configured"})
-			c.Abort()
-			return
-		}
+		secret := JWTSecret()
 
 		parsedToken, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return secret, nil

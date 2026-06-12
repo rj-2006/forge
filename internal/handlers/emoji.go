@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +18,19 @@ const (
 	MaxEmojiSize = 1 * 1024 * 1024
 )
 
-var adminUserIDs = map[uint]bool{
-	1: true,
-}
-
 func isAdmin(userID uint) bool {
-	return adminUserIDs[userID]
+	adminIDs := strings.Split(os.Getenv("ADMIN_USER_IDS"), ",")
+	for _, rawID := range adminIDs {
+		trimmed := strings.TrimSpace(rawID)
+		if trimmed == "" {
+			continue
+		}
+		parsedID, err := strconv.ParseUint(trimmed, 10, 64)
+		if err == nil && uint(parsedID) == userID {
+			return true
+		}
+	}
+	return false
 }
 
 func CreateCustomEmoji(c *gin.Context) {

@@ -1,17 +1,15 @@
 package websocket
 
 import (
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
 
 const (
-	writeWait      = 10 * time.Second
-	pongWait       = 60 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512 * 1024
+	writeWait  = 10 * time.Second
+	pongWait   = 60 * time.Second
+	pingPeriod = (pongWait * 9) / 10
 )
 
 type Client struct {
@@ -21,36 +19,6 @@ type Client struct {
 	RoomID   string
 	UserID   uint
 	Username string
-}
-
-func (c *Client) ReadPump() {
-	defer func() {
-		c.Hub.Unregister <- c
-		c.Conn.Close()
-	}()
-
-	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.Conn.SetReadLimit(maxMessageSize)
-	c.Conn.SetPongHandler(func(string) error {
-		c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
-	})
-
-	for {
-		_, message, err := c.Conn.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Websocket error: %v", err)
-			}
-			break
-		}
-
-		c.Hub.Broadcast <- &BroadcastMessage{
-			RoomID:  c.RoomID,
-			Message: message,
-			Sender:  c,
-		}
-	}
 }
 
 func (c *Client) WritePump() {
@@ -81,3 +49,4 @@ func (c *Client) WritePump() {
 		}
 	}
 }
+
