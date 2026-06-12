@@ -28,9 +28,6 @@ var upgrader = websocket.Upgrader{
 var ChatHub *ws.Hub
 
 func isAllowedWebsocketOrigin(origin string) bool {
-	if origin == "" {
-		return true
-	}
 
 	allowedOrigin := os.Getenv("APP_ORIGIN")
 	if allowedOrigin != "" && origin == allowedOrigin {

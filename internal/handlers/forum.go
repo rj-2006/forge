@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rj-2006/techtalk/internal/database"
 	"github.com/rj-2006/techtalk/internal/models"
+	"gorm.io/gorm"
 )
 
 func CreateThread(c *gin.Context) {
@@ -31,38 +32,46 @@ func CreateThread(c *gin.Context) {
 		UserID: userID,
 	}
 
-	if err := database.DB.Create(&thread).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Thread."})
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. Create the thread
+		if err := tx.Create(&thread).Error; err != nil {
+			return err // Returning an error triggers a rollback
+		}
+		// 2. Create the initial post (if content exists)
+		if req.Content != "" {
+			post := models.Post{
+				Content:  req.Content,
+				ThreadID: thread.ID,
+				UserID:   userID,
+			}
+			if err := tx.Create(&post).Error; err != nil {
+				return err
+			}
+		}
+		// 3. Attach any images
+		if len(req.Images) > 0 {
+			images := make([]models.ThreadImage, 0, len(req.Images))
+			for _, image := range req.Images {
+				images = append(images, models.ThreadImage{
+					ThreadID: thread.ID,
+					URL:      image.URL,
+					Caption:  image.Caption,
+				})
+			}
+			if err := tx.Create(&images).Error; err != nil {
+				return err
+			}
+		}
+		// If everything passes, return nil to commit the transaction!
+		return nil
+	})
+	// Handle the transaction result
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Thread and attachments."})
 		return
 	}
 
-	// If content is provided, create initial post
-	if req.Content != "" {
-		post := models.Post{
-			Content:  req.Content,
-			ThreadID: thread.ID,
-			UserID:   userID,
-		}
-		database.DB.Create(&post)
-	}
-
-	if len(req.Images) > 0 {
-		images := make([]models.ThreadImage, 0, len(req.Images))
-		for _, image := range req.Images {
-			images = append(images, models.ThreadImage{
-				ThreadID: thread.ID,
-				URL:      image.URL,
-				Caption:  image.Caption,
-			})
-		}
-		if err := database.DB.Create(&images).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to attach thread images."})
-			return
-		}
-	}
-
 	database.DB.Preload("User").Preload("Posts").Preload("Images").First(&thread, thread.ID)
-
 	c.JSON(http.StatusCreated, thread)
 }
 
