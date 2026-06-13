@@ -37,6 +37,11 @@ func AddThreadReactions(c *gin.Context) {
 		return
 	}
 
+	if !validEmojis[req.Emoji] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid emoji type"})
+		return
+	}
+
 	userID := c.GetUint("user_id")
 
 	var thread models.Thread

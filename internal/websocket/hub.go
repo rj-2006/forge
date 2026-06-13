@@ -73,8 +73,15 @@ func (h *Hub) Run() {
 				case client.Send <- broadcastMsg.Message:
 				default:
 					h.mu.Lock()
-					delete(h.Rooms[broadcastMsg.RoomID], client)
-					close(client.Send)
+					if clients, ok := h.Rooms[broadcastMsg.RoomID]; ok {
+						if _, exists := clients[client]; exists {
+							delete(clients, client)
+							close(client.Send)
+							if len(clients) == 0 {
+								delete(h.Rooms, broadcastMsg.RoomID)
+							}
+						}
+					}
 					h.mu.Unlock()
 				}
 			}
