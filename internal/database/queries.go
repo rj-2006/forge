@@ -41,7 +41,7 @@ func FetchThreadByID(threadID uint) (*models.Thread, error) {
 	return &thread, nil
 }
 
-func ListThreads(search string) ([]models.Thread, error) {
+func ListThreads(search string, page int, limit int) ([]models.Thread, error) {
 	var threads []models.Thread
 
 	query := DB.
@@ -56,6 +56,9 @@ func ListThreads(search string) ([]models.Thread, error) {
 	if search != "" {
 		query = query.Where("title ILIKE ?", "%"+search+"%")
 	}
+
+	offset := (page - 1) * limit
+	query = query.Limit(limit).Offset(offset)
 
 	if err := query.Find(&threads).Error; err != nil {
 		return nil, err

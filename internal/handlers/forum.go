@@ -102,7 +102,18 @@ func GetThread(c *gin.Context) {
 
 func GetThreads(c *gin.Context) {
 	search := c.Query("search")
-	threads, err := database.ListThreads(search)
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
+
+	threads, err := database.ListThreads(search, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch threads"})
 		return
