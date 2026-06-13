@@ -40,11 +40,27 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file type"})
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError.gin.H{"error": "failed to process upload"})
 		return
 	}
+	defer src.Close()
+
+	//validation logic for file type checking
+	buffer := make([]byte, 512)
+	if _, err := src.Read(buffer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to read file"})
+		return
+	}
+
+	contentType := http.DetectContentType(buffer)
+	if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/gif" && contentType != "image/webp" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type (jpg, png, gif, webp only)"})
+		return
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
 
 	filename := fmt.Sprintf("%d_%s%s", userID, uuid.New().String(), ext)
 	filePath := filepath.Join(UploadPath, "avatars", filename)

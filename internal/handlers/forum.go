@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/rj-2006/techtalk/internal/database"
 	"github.com/rj-2006/techtalk/internal/models"
 	"gorm.io/gorm"
@@ -23,6 +24,14 @@ func CreateThread(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	p := bluemonday.StrictPolicy()
+	req.Title = p.Sanitize(req.Title)
+	req.Content = p.Sanitize(req.Content)
+
+	for i := range req.Images {
+		req.Images[i].Caption = p.Sanitize(req.Images[i].Caption)
 	}
 
 	userID := c.GetUint("user_id")
@@ -117,6 +126,9 @@ func CreatePost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	p := bluemonday.StrictPolicy()
+	req.Content = p.Sanitize(req.Content)
 
 	var thread models.Thread
 

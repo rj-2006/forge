@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/rj-2006/techtalk/internal/database"
 	"github.com/rj-2006/techtalk/internal/models"
 	ws "github.com/rj-2006/techtalk/internal/websocket"
@@ -175,7 +176,11 @@ func handleChatMessages(client *ws.Client) {
 					content = payload.Content
 				}
 			}
-			if content == "" {
+
+			p := bluemonday.StrictPolicy()
+			cleanContent := p.Sanitize(content)
+
+			if cleanContent == "" {
 				continue
 			}
 
@@ -183,7 +188,7 @@ func handleChatMessages(client *ws.Client) {
 			chatMessage := models.ChatMessage{
 				ChatroomID: uint(roomID),
 				UserID:     client.UserID,
-				Content:    content,
+				Content:    cleanContent,
 			}
 
 			if err := database.DB.Create(&chatMessage).Error; err != nil {
