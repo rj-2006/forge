@@ -37,17 +37,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		token := normalizeToken(c.Query("token"))
 
 		if token == "" {
-			authHeader := c.GetHeader("Authorization")
-			if authHeader == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization Header Required"})
-				c.Abort()
-				return
+			cookieToken, err := c.Cookie("auth-token")
+			if err == nil {
+				token = normalizeToken(cookieToken)
 			}
-			token = normalizeToken(authHeader)
 		}
 
 		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization Header Required"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization Cookie Required"})
 			c.Abort()
 			return
 		}

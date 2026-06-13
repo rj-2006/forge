@@ -70,9 +70,10 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("auth-token", tokenString, 3600*24, "/", "", false, true)
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User created successfully",
-		"token":   tokenString,
 		"user": gin.H{
 			"id":       user.ID,
 			"username": user.Username,
@@ -107,8 +108,35 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("auth-token", tokenString, 3600*24, "/", "", false, true)
+
 	c.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.Username,
+			"email":    user.Email,
+			"avatar":   user.Avatar,
+		},
+	})
+
+}
+
+func GetMe(c *gin.Context) {
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var user models.User
+
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User Not Found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
 			"id":       user.ID,
 			"username": user.Username,

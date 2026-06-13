@@ -78,6 +78,7 @@ func main() {
 	protected := r.Group("/api")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		protected.GET("/me", handlers.GetMe)
 		// Forum
 		protected.POST("/threads", handlers.CreateThread)
 		protected.GET("/threads", handlers.GetThreads)
