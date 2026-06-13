@@ -144,6 +144,7 @@ export function CreateThreadModal({
                     src={url}
                     alt={`Preview ${index + 1}`}
                     className="h-20 w-20 rounded-md object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
                   />
                   <button
                     type="button"

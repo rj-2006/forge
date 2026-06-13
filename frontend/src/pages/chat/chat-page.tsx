@@ -4,6 +4,7 @@ import { useChatrooms, useChatHistory, useCreateChatroom } from '../../hooks/use
 import { useChatWebSocket } from '../../hooks/use-websocket'
 import { useAuthStore } from '../../stores/auth-store'
 import { PageContainer } from '../../components/layout/page-container'
+import { ErrorBoundary } from '../../components/error-boundary'
 import { ChatroomSidebar } from '../../components/chat/chatroom-sidebar'
 import { MessageList } from '../../components/chat/message-list'
 import { MessageInput } from '../../components/chat/message-input'
@@ -105,6 +106,7 @@ export function ChatPage() {
       />
 
       <div className="flex min-h-0 flex-1 flex-col">
+        <ErrorBoundary>
         {chatroomId ? (
           <>
             {/* Chat Header */}
@@ -160,6 +162,7 @@ export function ChatPage() {
             </div>
           </div>
         )}
+        </ErrorBoundary>
       </div>
     </PageContainer>
   )

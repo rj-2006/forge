@@ -245,6 +245,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
                   src={resolveAssetUrl(data.club.logo_url || '/Devign logo v1 pngV.png')}
                   alt={data.club.name}
                   className="h-7 w-auto"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               </div>
               <div>
@@ -463,6 +464,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
                 src={resolveAssetUrl(data.club.logo_url || '/Devign logo v1 pngV.png')}
                 alt={data.club.name}
                 className="h-7 w-auto"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
             </div>
             <div>

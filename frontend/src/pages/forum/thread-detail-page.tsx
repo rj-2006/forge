@@ -5,6 +5,7 @@ import { useThread, useCreatePost, useAddReaction, useRemoveReaction } from '../
 import { useAuthStore } from '../../stores/auth-store'
 import { PageContainer, PageContent } from '../../components/layout/page-container'
 import { Button } from '../../components/ui/button'
+import { ErrorBoundary } from '../../components/error-boundary'
 import { formatDistanceToNow } from 'date-fns'
 import { cn, resolveAssetUrl } from '../../lib/utils'
 import { ReactionButton } from '../../components/forum/reaction-button'
@@ -95,6 +96,7 @@ export function ThreadDetailPage() {
   return (
     <PageContainer>
       <PageContent>
+        <ErrorBoundary>
         <div className="max-w-4xl mx-auto space-y-6">
           <Button
             variant="ghost"
@@ -137,6 +139,7 @@ export function ThreadDetailPage() {
                       'rounded-md object-cover',
                       thread.images!.length === 1 ? 'max-h-96 w-full' : 'h-48 w-full'
                     )}
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
                   />
                 ))}
               </div>
@@ -215,6 +218,7 @@ export function ThreadDetailPage() {
             )}
           </div>
         </div>
+        </ErrorBoundary>
       </PageContent>
     </PageContainer>
   )

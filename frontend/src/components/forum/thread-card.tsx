@@ -105,6 +105,7 @@ export function ThreadCard({
                     src={resolveAssetUrl(image.url)}
                     alt={image.caption || ''}
                     className="h-full w-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
                   />
                   {index === 3 && imageCount > 4 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-medium">
