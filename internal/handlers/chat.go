@@ -102,13 +102,34 @@ func GetChatHistory(c *gin.Context) {
 		return
 	}
 
+	// Parse query parameters with defaults
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 50 // Cap max limit for safety
+	}
+
+	offset := (page - 1) * limit
+
 	var messages []models.ChatMessage
 
-	if err := database.DB.Where("chatroom_id = ?", roomID).Preload("User").Order(
-		"created_at ASC").Limit(100).Find(&messages).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch chat messages."})
+	// Order by DESC to get the newest messages first
+	if err := database.DB.Where("chatroom_id = ?", roomID).Preload("User").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&messages).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch chat messages."})
 		return
+	}
+
+	// Reverse the slice in-memory so they display chronologically (oldest at top, newest at bottom)
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
 	}
 
 	c.JSON(http.StatusOK, messages)
