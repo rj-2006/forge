@@ -17,11 +17,11 @@ export function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [typingUsers, setTypingUsers] = useState<string[]>([])
   const typingTimeoutsRef = useRef<Record<string, number>>({})
-  
+
   const { data: chatrooms, isLoading: chatroomsLoading } = useChatrooms()
   const { data: history, isLoading: historyLoading } = useChatHistory(chatroomId || 0)
   const createChatroom = useCreateChatroom()
-  
+
   const userId = useAuthStore((state) => state.user?.id)
 
   const handleNewMessage = useCallback((message: ChatMessage) => {
@@ -55,7 +55,7 @@ export function ChatPage() {
     typingTimeoutsRef.current = {}
   }, [])
 
-  const { isConnected, sendMessage, sendTyping, joinRoom, leaveRoom } = useChatWebSocket({
+  const { isConnected, sendMessage, sendTyping } = useChatWebSocket({
     chatroomId: chatroomId ?? 0,
     onMessage: handleNewMessage,
     onTyping: handleTypingUser,
@@ -71,22 +71,9 @@ export function ChatPage() {
   useEffect(() => {
     return () => {
       Object.values(typingTimeoutsRef.current).forEach((timeoutId) => clearTimeout(timeoutId))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!chatroomId) return
-
-    const timer = setTimeout(() => {
-      joinRoom()
-    }, 100)
-    
-    return () => {
-      clearTimeout(timer)
-      leaveRoom()
       setTypingUsers([])
     }
-  }, [chatroomId, joinRoom, leaveRoom])
+  }, [])
 
   const handleSendMessage = (content: string) => {
     if (!isConnected) {

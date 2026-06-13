@@ -178,7 +178,7 @@ func seedAnnouncements() {
 		user = models.User{
 			Username: "devign-bot",
 			Email:    "bot@devign.club",
-			Password: "$2a$10$placeholder", // not a real login
+			Password: "$2a$10$c59tXYhmjoub86.ehMV/4e407e9w0w3WZdCCVjlYgiLHNIetG7aVu", // password123
 		}
 		DB.Create(&user)
 	}
