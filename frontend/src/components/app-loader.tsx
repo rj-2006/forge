@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import App from '../App'
 import { useAuthStore } from '../stores/auth-store'
+import { authService } from '../services/auth-service'
 
 function LoadingScreen() {
   return (
@@ -16,6 +17,10 @@ function LoadingScreen() {
 export function AppLoader() {
   const isLoading = useAuthStore((state) => state.isLoading)
   const [showLoading, setShowLoading] = useState(true)
+
+  useEffect(() => {
+    authService.checkSession()
+  }, [])
 
   useEffect(() => {
     if (!isLoading) {

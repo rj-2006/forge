@@ -41,6 +41,7 @@ func Migrate() error {
 		&models.TeamMember{},
 		&models.Event{},
 		&models.Announcement{},
+		&models.RefreshToken{},
 	)
 
 	if err != nil {

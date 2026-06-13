@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +15,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func issueToken(user models.User) (string, error) {
+func issueAccessToken(user models.User) (string, error) {
 	claims := &middleware.Claims{
 		UserID:   user.ID,
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -26,6 +29,51 @@ func issueToken(user models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secret)
+}
+
+func generateRandomToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+func issueRefreshToken(userID uint, familyID string) (string, error) {
+	token, err := generateRandomToken()
+	if err != nil {
+		return "", err
+	}
+
+	if familyID == "" {
+		familyID, err = generateRandomToken()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	rt := models.RefreshToken{
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+		FamilyID:  familyID,
+	}
+
+	if err := database.DB.Create(&rt).Error; err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func setRefreshTokenCookie(c *gin.Context, token string) {
+	secure := os.Getenv("ENV") == "production" || os.Getenv("APP_ENV") == "production"
+	c.SetCookie("refresh-token", token, int(7*24*time.Hour/time.Second), "/", "", secure, true)
+}
+
+func clearRefreshTokenCookie(c *gin.Context) {
+	secure := os.Getenv("ENV") == "production" || os.Getenv("APP_ENV") == "production"
+	c.SetCookie("refresh-token", "", -1, "/", "", secure, true)
 }
 
 type RegisterRequest struct {
@@ -64,16 +112,23 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := issueToken(user)
+	accessToken, err := issueAccessToken(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token."})
 		return
 	}
 
-	c.SetCookie("auth-token", tokenString, 3600*24, "/", "", false, true)
+	refreshToken, err := issueRefreshToken(user.ID, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate session."})
+		return
+	}
+
+	setRefreshTokenCookie(c, refreshToken)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User created successfully",
+		"token":   accessToken,
 		"user": gin.H{
 			"id":       user.ID,
 			"username": user.Username,
@@ -102,15 +157,22 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := issueToken(user)
+	accessToken, err := issueAccessToken(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token."})
 		return
 	}
 
-	c.SetCookie("auth-token", tokenString, 3600*24, "/", "", false, true)
+	refreshToken, err := issueRefreshToken(user.ID, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate session."})
+		return
+	}
+
+	setRefreshTokenCookie(c, refreshToken)
 
 	c.JSON(http.StatusOK, gin.H{
+		"token": accessToken,
 		"user": gin.H{
 			"id":       user.ID,
 			"username": user.Username,
@@ -118,11 +180,9 @@ func Login(c *gin.Context) {
 			"avatar":   user.Avatar,
 		},
 	})
-
 }
 
 func GetMe(c *gin.Context) {
-
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -144,5 +204,90 @@ func GetMe(c *gin.Context) {
 			"avatar":   user.Avatar,
 		},
 	})
+}
 
+func RefreshTokenHandler(c *gin.Context) {
+	cookieToken, err := c.Cookie("refresh-token")
+	if err != nil || cookieToken == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token required"})
+		return
+	}
+
+	var rt models.RefreshToken
+	if err := database.DB.Where("token = ?", cookieToken).First(&rt).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	// Reuse detection
+	if rt.Used || rt.Revoked {
+		// Revoke the entire token family
+		database.DB.Model(&models.RefreshToken{}).
+			Where("family_id = ?", rt.FamilyID).
+			Update("revoked", true)
+
+		clearRefreshTokenCookie(c)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Compromised session. Please log in again."})
+		return
+	}
+
+	// Check expiration
+	if time.Now().After(rt.ExpiresAt) {
+		rt.Revoked = true
+		database.DB.Save(&rt)
+		clearRefreshTokenCookie(c)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
+		return
+	}
+
+	// Get user
+	var user models.User
+	if err := database.DB.First(&user, rt.UserID).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Rotate token
+	accessToken, err := issueAccessToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		return
+	}
+
+	newRefreshToken, err := issueRefreshToken(user.ID, rt.FamilyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		return
+	}
+
+	// Mark current token as used
+	rt.Used = true
+	if err := database.DB.Save(&rt).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update token status"})
+		return
+	}
+
+	setRefreshTokenCookie(c, newRefreshToken)
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": accessToken,
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.Username,
+			"email":    user.Email,
+			"avatar":   user.Avatar,
+		},
+	})
+}
+
+func LogoutHandler(c *gin.Context) {
+	cookieToken, err := c.Cookie("refresh-token")
+	if err == nil && cookieToken != "" {
+		database.DB.Model(&models.RefreshToken{}).
+			Where("token = ?", cookieToken).
+			Update("revoked", true)
+	}
+
+	clearRefreshTokenCookie(c)
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

@@ -5,9 +5,49 @@ const BASE_URL = import.meta.env.VITE_API_URL || "";
 
 class ApiClient {
   private baseUrl: string;
+  private refreshPromise: Promise<string> | null = null;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+  }
+
+  private async executeRefresh(): Promise<string> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Refresh failed");
+      }
+
+      const data = await response.json();
+      const newToken = data.token;
+      if (!newToken) {
+        throw new Error("No token returned");
+      }
+
+      // Update the auth store with the new token
+      useAuthStore.getState().login(data.user, newToken);
+      return newToken;
+    } catch (error) {
+      useAuthStore.getState().logout();
+      throw error;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  private async getFreshToken(): Promise<string> {
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+    this.refreshPromise = this.executeRefresh();
+    return this.refreshPromise;
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
@@ -47,20 +87,46 @@ class ApiClient {
     return response.text() as Promise<T>;
   }
 
-  private createHeaders(_includeAuth: boolean = true): HeadersInit {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-    return headers;
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit,
+    includeAuth: boolean = true,
+  ): Promise<T> {
+    const headers = new Headers(options.headers || {});
+    if (includeAuth) {
+      const token = useAuthStore.getState().token;
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+    }
+    options.headers = headers;
+
+    let response = await fetch(`${this.baseUrl}${endpoint}`, options);
+
+    if (response.status === 401 && includeAuth && !endpoint.includes("/api/auth/refresh")) {
+      try {
+        const newToken = await this.getFreshToken();
+        const retryHeaders = new Headers(options.headers);
+        retryHeaders.set("Authorization", `Bearer ${newToken}`);
+        const retryOptions = { ...options, headers: retryHeaders };
+        response = await fetch(`${this.baseUrl}${endpoint}`, retryOptions);
+      } catch (refreshError) {
+        throw refreshError;
+      }
+    }
+
+    return this.handleResponse<T>(response);
   }
 
   async get<T>(endpoint: string, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "GET",
-      headers: this.createHeaders(includeAuth),
-      credentials: "include",
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+      includeAuth,
+    );
   }
 
   async post<T>(
@@ -68,13 +134,18 @@ class ApiClient {
     data?: unknown,
     includeAuth: boolean = true,
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "POST",
-      headers: this.createHeaders(includeAuth),
-      credentials: "include",
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "POST",
+        credentials: "include",
+        body: data ? JSON.stringify(data) : undefined,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+      includeAuth,
+    );
   }
 
   async put<T>(
@@ -82,13 +153,18 @@ class ApiClient {
     data?: unknown,
     includeAuth: boolean = true,
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "PUT",
-      headers: this.createHeaders(includeAuth),
-      credentials: "include",
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "PUT",
+        credentials: "include",
+        body: data ? JSON.stringify(data) : undefined,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+      includeAuth,
+    );
   }
 
   async patch<T>(
@@ -96,58 +172,65 @@ class ApiClient {
     data?: unknown,
     includeAuth: boolean = true,
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "PATCH",
-      headers: this.createHeaders(includeAuth),
-      credentials: "include",
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "PATCH",
+        credentials: "include",
+        body: data ? JSON.stringify(data) : undefined,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+      includeAuth,
+    );
   }
 
   async delete<T>(endpoint: string, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "DELETE",
-      headers: this.createHeaders(includeAuth),
-      credentials: "include",
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "DELETE",
+        credentials: "include",
+      },
+      includeAuth,
+    );
   }
 
   async postForm<T>(
     endpoint: string,
     formData: FormData,
-    _includeAuth: boolean = true,
+    includeAuth: boolean = true,
   ): Promise<T> {
-    const headers: HeadersInit = {};
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "POST",
-      headers,
-      credentials: "include",
-      body: formData,
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      },
+      includeAuth,
+    );
   }
 
   async upload<T>(
     endpoint: string,
     file: File,
     fieldName: string = "file",
-    _includeAuth: boolean = true,
+    includeAuth: boolean = true,
   ): Promise<T> {
     const formData = new FormData();
     formData.append(fieldName, file);
 
-    const headers: HeadersInit = {};
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "POST",
-      headers,
-      credentials: "include",
-      body: formData,
-    });
-    return this.handleResponse<T>(response);
+    return this.request<T>(
+      endpoint,
+      {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      },
+      includeAuth,
+    );
   }
 }
 

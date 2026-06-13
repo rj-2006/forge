@@ -34,17 +34,14 @@ func JWTSecret() []byte {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := normalizeToken(c.Query("token"))
+		token := normalizeToken(c.GetHeader("Authorization"))
 
 		if token == "" {
-			cookieToken, err := c.Cookie("auth-token")
-			if err == nil {
-				token = normalizeToken(cookieToken)
-			}
+			token = normalizeToken(c.Query("token"))
 		}
 
 		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization Cookie Required"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
 			c.Abort()
 			return
 		}

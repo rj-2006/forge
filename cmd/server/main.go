@@ -56,7 +56,9 @@ func main() {
 	// CORS Middleware
 	r.Use(cors.New(cors.Config{
 		AllowOriginFunc: func(origin string) bool {
+			allowedOrigin := os.Getenv("APP_ORIGIN")
 			return origin == "" ||
+				(allowedOrigin != "" && origin == allowedOrigin) ||
 				strings.HasPrefix(origin, "http://localhost:") ||
 				strings.HasPrefix(origin, "http://127.0.0.1:") ||
 				strings.HasPrefix(origin, "https://localhost:") ||
@@ -72,6 +74,8 @@ func main() {
 	// Public routes
 	r.POST("/api/register", handlers.Register)
 	r.POST("/api/login", handlers.Login)
+	r.POST("/api/auth/refresh", handlers.RefreshTokenHandler)
+	r.POST("/api/auth/logout", handlers.LogoutHandler)
 	r.GET("/api/homepage", handlers.GetHomepage)
 
 	// Protected routes

@@ -25,7 +25,26 @@ export const authService = {
     throw new Error('No user session')
   },
 
-  logout() {
+  async checkSession(): Promise<User | null> {
+    useAuthStore.getState().setLoading(true)
+    try {
+      const user = await api.get<User>('/api/me')
+      useAuthStore.getState().setUser(user)
+      return user
+    } catch {
+      useAuthStore.getState().logout()
+      return null
+    } finally {
+      useAuthStore.getState().setLoading(false)
+    }
+  },
+
+  async logout(): Promise<void> {
+    try {
+      await api.post('/api/auth/logout', {}, false)
+    } catch {
+      // ignore
+    }
     useAuthStore.getState().logout()
   },
 

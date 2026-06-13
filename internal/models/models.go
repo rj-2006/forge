@@ -145,3 +145,15 @@ type Announcement struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type RefreshToken struct {
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	UserID    uint           `gorm:"not null" json:"user_id"`
+	User      User           `gorm:"foreignKey:UserID" json:"-"`
+	Token     string         `gorm:"uniqueIndex;not null" json:"token"`
+	ExpiresAt time.Time      `gorm:"not null" json:"expires_at"`
+	FamilyID  string         `gorm:"index;not null" json:"family_id"`
+	Used      bool           `gorm:"default:false" json:"used"`
+	Revoked   bool           `gorm:"default:false" json:"revoked"`
+	CreatedAt time.Time      `json:"created_at"`
+}
