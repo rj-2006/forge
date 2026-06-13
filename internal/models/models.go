@@ -22,11 +22,11 @@ type Thread struct {
 	Title     string           `gorm:"not null" json:"title"`
 	UserID    uint             `gorm:"not null" json:"user_id"`
 	User      User             `gorm:"foreignKey:UserID" json:"user"`
-	Posts     []Post           `gorm:"foreignKey:ThreadID" json:"posts,omitempty"`
+	Posts     []Post           `gorm:"foreignKey:ThreadID;constraint:OnDelete:CASCADE;" json:"posts,omitempty"`
 	CreatedAt time.Time        `json:"created_at"`
 	UpdatedAt time.Time        `json:"updated_at"`
-	Images    []ThreadImage    `gorm:"foreignKey:ThreadID" json:"images,omitempty"`
-	Reactions []ThreadReaction `gorm:"foreignKey:ThreadID" json:"reactions,omitempty"`
+	Images    []ThreadImage    `gorm:"foreignKey:ThreadID;constraint:OnDelete:CASCADE;" json:"images,omitempty"`
+	Reactions []ThreadReaction `gorm:"foreignKey:ThreadID;constraint:OnDelete:CASCADE;" json:"reactions,omitempty"`
 }
 
 type Post struct {
