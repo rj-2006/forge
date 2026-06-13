@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,7 +19,13 @@ const (
 	MaxEmojiSize = 1 * 1024 * 1024
 )
 
-func isAdmin(userID uint) bool {
+var (
+	adminIDsCache  map[uint]bool
+	adminCacheOnce sync.Once
+)
+
+func parseAdmins() {
+	adminIDsCache = make(map[uint]bool)
 	adminIDs := strings.Split(os.Getenv("ADMIN_USER_IDS"), ",")
 	for _, rawID := range adminIDs {
 		trimmed := strings.TrimSpace(rawID)
@@ -26,11 +33,15 @@ func isAdmin(userID uint) bool {
 			continue
 		}
 		parsedID, err := strconv.ParseUint(trimmed, 10, 64)
-		if err == nil && uint(parsedID) == userID {
-			return true
+		if err == nil {
+			adminIDsCache[uint(parsedID)] = true
 		}
 	}
-	return false
+}
+
+func isAdmin(userID uint) bool {
+	adminCacheOnce.Do(parseAdmins)
+	return adminIDsCache[userID]
 }
 
 func CreateCustomEmoji(c *gin.Context) {
@@ -67,6 +78,25 @@ func CreateCustomEmoji(c *gin.Context) {
 
 	if file.Size > MaxEmojiSize {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File too large (max 1MB)"})
+		return
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process upload"})
+		return
+	}
+	defer src.Close()
+
+	buffer := make([]byte, 512)
+	if _, err := src.Read(buffer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
+		return
+	}
+
+	contentType := http.DetectContentType(buffer)
+	if contentType != "image/png" && contentType != "image/gif" && contentType != "image/webp" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type (png, gif, webp only)"})
 		return
 	}
 

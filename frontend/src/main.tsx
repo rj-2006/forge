@@ -8,7 +8,7 @@ import { ToastProvider } from './lib/toast'
 import { queryClient } from './lib/query-provider'
 import './index.css'
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

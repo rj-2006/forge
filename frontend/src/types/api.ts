@@ -102,7 +102,7 @@ export interface ClubConfig {
   description: string
   logo_url: string
   hero_image_url: string
-  social_links: string // JSON string
+  social_links: Record<string, string> | string // Map or JSON string
   founding_year: number
   contact_email: string
   created_at: string
@@ -115,7 +115,7 @@ export interface TeamMember {
   role: string
   bio: string
   avatar_url: string
-  social_links: string // JSON string
+  social_links: Record<string, string> | string // Map or JSON string
   display_order: number
   is_active: boolean
   created_at: string

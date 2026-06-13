@@ -20,9 +20,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Avatar, AvatarGroup } from '../../components/ui/avatar'
 import type { Announcement, Event, HomepageData, TeamMember } from '../../types/api'
 
-function parseSocialLinks(raw?: string) {
+function parseSocialLinks(raw?: string | Record<string, string>) {
+  if (typeof raw === 'object' && raw !== null) {
+    return raw
+  }
   try {
-    return JSON.parse(raw || '{}') as Record<string, string>
+    return JSON.parse((raw as string) || '{}') as Record<string, string>
   } catch {
     return {}
   }

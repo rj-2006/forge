@@ -103,6 +103,11 @@ func GetThread(c *gin.Context) {
 func GetThreads(c *gin.Context) {
 	search := c.Query("search")
 
+	if len(search) > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Search query too long (max 100 characters)"})
+		return
+	}
+
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 

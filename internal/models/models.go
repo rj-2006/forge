@@ -1,10 +1,40 @@
 package models
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
 )
+
+type SocialLinks map[string]string
+
+func (sl SocialLinks) Value() (driver.Value, error) {
+	if len(sl) == 0 {
+		return "{}", nil
+	}
+	b, err := json.Marshal(sl)
+	return string(b), err
+}
+
+func (sl *SocialLinks) Scan(value interface{}) error {
+	if value == nil {
+		*sl = make(map[string]string)
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		str, ok := value.(string)
+		if !ok {
+			return errors.New("invalid type for SocialLinks")
+		}
+		bytes = []byte(str)
+	}
+	*sl = make(map[string]string)
+	return json.Unmarshal(bytes, sl)
+}
 
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
@@ -93,29 +123,29 @@ type CustomEmoji struct {
 // ── Club Homepage Models ──
 
 type ClubConfig struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	Name         string    `gorm:"not null" json:"name"`
-	Tagline      string    `json:"tagline"`
-	Description  string    `gorm:"type:text" json:"description"`
-	LogoURL      string    `json:"logo_url"`
-	HeroImageURL string    `json:"hero_image_url"`
-	SocialLinks  string    `gorm:"type:text" json:"social_links"` // JSON: {"github":"...","discord":"...","twitter":"...","instagram":"...","linkedin":"...","website":"..."}
-	FoundingYear int       `json:"founding_year"`
-	ContactEmail string    `json:"contact_email"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint        `gorm:"primaryKey" json:"id"`
+	Name         string      `gorm:"not null" json:"name"`
+	Tagline      string      `json:"tagline"`
+	Description  string      `gorm:"type:text" json:"description"`
+	LogoURL      string      `json:"logo_url"`
+	HeroImageURL string      `json:"hero_image_url"`
+	SocialLinks  SocialLinks `gorm:"type:text" json:"social_links"` // Structured Map
+	FoundingYear int         `json:"founding_year"`
+	ContactEmail string      `json:"contact_email"`
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
 }
 
 type TeamMember struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	Name         string    `gorm:"not null" json:"name"`
-	Role         string    `gorm:"not null" json:"role"`
-	Bio          string    `gorm:"type:text" json:"bio"`
-	AvatarURL    string    `json:"avatar_url"`
-	SocialLinks  string    `gorm:"type:text" json:"social_links"` // JSON
-	DisplayOrder int       `gorm:"default:0" json:"display_order"`
-	IsActive     bool      `gorm:"default:true" json:"is_active"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID           uint        `gorm:"primaryKey" json:"id"`
+	Name         string      `gorm:"not null" json:"name"`
+	Role         string      `gorm:"not null" json:"role"`
+	Bio          string      `gorm:"type:text" json:"bio"`
+	AvatarURL    string      `json:"avatar_url"`
+	SocialLinks  SocialLinks `gorm:"type:text" json:"social_links"` // Structured Map
+	DisplayOrder int         `gorm:"default:0" json:"display_order"`
+	IsActive     bool        `gorm:"default:true" json:"is_active"`
+	CreatedAt    time.Time   `json:"created_at"`
 }
 
 type Event struct {

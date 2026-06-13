@@ -1,7 +1,10 @@
 package database
 
 import (
+	"context"
+
 	"github.com/rj-2006/techtalk/internal/models"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
@@ -69,36 +72,60 @@ func ListThreads(search string, page int, limit int) ([]models.Thread, error) {
 
 func FetchHomepageBundle() (*HomepageBundle, error) {
 	var bundle HomepageBundle
+	g, _ := errgroup.WithContext(context.Background())
 
-	if err := DB.First(&bundle.Club).Error; err != nil {
+	// 1. Club Config
+	g.Go(func() error {
+		return DB.First(&bundle.Club).Error
+	})
+
+	// 2. Team Members
+	g.Go(func() error {
+		return DB.Where("is_active = ?", true).
+			Order("display_order ASC").
+			Find(&bundle.Team).Error
+	})
+
+	// 3. Events
+	g.Go(func() error {
+		return DB.Where("status IN ?", []string{"upcoming", "ongoing"}).
+			Order("date ASC").
+			Limit(6).
+			Find(&bundle.Events).Error
+	})
+
+	// 4. Announcements
+	g.Go(func() error {
+		return DB.Where("is_pinned = ?", true).
+			Preload("Author").
+			Order("created_at DESC").
+			Limit(5).
+			Find(&bundle.Announcements).Error
+	})
+
+	// 5. TotalMembers
+	g.Go(func() error {
+		return DB.Model(&models.User{}).Count(&bundle.Stats.TotalMembers).Error
+	})
+
+	// 6. TotalThreads
+	g.Go(func() error {
+		return DB.Model(&models.Thread{}).Count(&bundle.Stats.TotalThreads).Error
+	})
+
+	// 7. TotalChatrooms
+	g.Go(func() error {
+		return DB.Model(&models.Chatroom{}).Count(&bundle.Stats.TotalChatrooms).Error
+	})
+
+	// 8. TotalEvents
+	g.Go(func() error {
+		return DB.Model(&models.Event{}).Count(&bundle.Stats.TotalEvents).Error
+	})
+
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
-
-	if err := DB.Where("is_active = ?", true).
-		Order("display_order ASC").
-		Find(&bundle.Team).Error; err != nil {
-		return nil, err
-	}
-
-	if err := DB.Where("status IN ?", []string{"upcoming", "ongoing"}).
-		Order("date ASC").
-		Limit(6).
-		Find(&bundle.Events).Error; err != nil {
-		return nil, err
-	}
-
-	if err := DB.Where("is_pinned = ?", true).
-		Preload("Author").
-		Order("created_at DESC").
-		Limit(5).
-		Find(&bundle.Announcements).Error; err != nil {
-		return nil, err
-	}
-
-	DB.Model(&models.User{}).Count(&bundle.Stats.TotalMembers)
-	DB.Model(&models.Thread{}).Count(&bundle.Stats.TotalThreads)
-	DB.Model(&models.Chatroom{}).Count(&bundle.Stats.TotalChatrooms)
-	DB.Model(&models.Event{}).Count(&bundle.Stats.TotalEvents)
 
 	return &bundle, nil
 }
