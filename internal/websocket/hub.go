@@ -60,10 +60,15 @@ func (h *Hub) Run() {
 
 		case broadcastMsg := <-h.Broadcast:
 			h.mu.RLock()
-			clients := h.Rooms[broadcastMsg.RoomID]
+			var targetClients []*Client
+			if clients, ok := h.Rooms[broadcastMsg.RoomID]; ok {
+				for client := range clients {
+					targetClients = append(targetClients, client)
+				}
+			}
 			h.mu.RUnlock()
 
-			for client := range clients {
+			for _, client := range targetClients {
 				select {
 				case client.Send <- broadcastMsg.Message:
 				default:
@@ -101,10 +106,15 @@ func (h *Hub) notifyLeave(client *Client) {
 
 func (h *Hub) broadcastToRoom(roomID string, data []byte) {
 	h.mu.RLock()
-	clients := h.Rooms[roomID]
+	var targetClients []*Client
+	if clients, ok := h.Rooms[roomID]; ok {
+		for client := range clients {
+			targetClients = append(targetClients, client)
+		}
+	}
 	h.mu.RUnlock()
 
-	for client := range clients {
+	for _, client := range targetClients {
 		select {
 		case client.Send <- data:
 		default:
