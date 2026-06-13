@@ -174,11 +174,11 @@ export function useChatWebSocket({
   onError,
   onClose,
 }: UseChatWebSocketOptions): UseChatWebSocketReturn {
-  const baseUrl =
-    import.meta.env.VITE_API_URL?.replace(/^http/, "ws") ||
-    "ws://localhost:5070";
+  const WS_BASE_URL =
+    import.meta.env.VITE_WS_URL ||
+    (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host;
   const wsUrl =
-    chatroomId > 0 ? `${baseUrl}/api/chatrooms/${chatroomId}/ws` : "";
+    chatroomId > 0 ? `${WS_BASE_URL}/api/chatrooms/${chatroomId}/ws` : "";
 
   const handleMessage = useCallback(
     (message: WebSocketMessage) => {

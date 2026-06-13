@@ -26,13 +26,22 @@ export function ChatroomSidebar({
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newChatroomName, setNewChatroomName] = useState('')
 
-  const handleCreate = (e: React.FormEvent) => {
+  const [error, setError] = useState<string | null>(null)
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newChatroomName.trim()) return
     
-    onCreateChatroom?.(newChatroomName.trim())
-    setNewChatroomName('')
-    setShowCreateForm(false)
+    setError(null)
+    try {
+      if (onCreateChatroom) {
+        await onCreateChatroom(newChatroomName.trim())
+      }
+      setNewChatroomName('')
+      setShowCreateForm(false)
+    } catch (err: any) {
+      setError(err.message || 'Failed to create chatroom')
+    }
   }
 
   return (
@@ -63,6 +72,7 @@ export function ChatroomSidebar({
       {/* Create Form */}
       {showCreateForm && (
         <form onSubmit={handleCreate} className="border-b p-3 space-y-2">
+          {error && <div className="text-xs text-destructive">{error}</div>}
           <Input
             value={newChatroomName}
             onChange={(e) => setNewChatroomName(e.target.value)}
@@ -77,7 +87,10 @@ export function ChatroomSidebar({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setShowCreateForm(false)}
+              onClick={() => {
+                setShowCreateForm(false)
+                setError(null)
+              }}
             >
               Cancel
             </Button>

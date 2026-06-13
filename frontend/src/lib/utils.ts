@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5070"
+const API_BASE_URL = import.meta.env.VITE_API_URL || ""
 
 export function resolveAssetUrl(url?: string | null) {
   if (!url) {
