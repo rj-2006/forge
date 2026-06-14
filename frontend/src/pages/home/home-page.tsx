@@ -377,7 +377,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
           </div>
         </section>
 
-        <section id="team" className="space-y-12">
+        <section id="team" className="space-y-12 scroll-mt-32">
           <div className="space-y-4 max-w-2xl">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Leadership</span>
             <h2 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white">Organizers</h2>
@@ -385,7 +385,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
           <TeamGrid team={data.team} />
         </section>
 
-        <section id="events" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <section id="events" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)] scroll-mt-32">
           <div className="space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Events</span>
             <h2 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white">Actions</h2>
@@ -393,7 +393,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
           <EventList events={data.events} />
         </section>
 
-        <section id="updates" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <section id="updates" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)] scroll-mt-32">
           <div className="space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Updates</span>
             <h2 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white">Bulletin</h2>
