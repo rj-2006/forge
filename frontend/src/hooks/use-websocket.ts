@@ -39,6 +39,10 @@ export function useWebSocket({
   const reconnectCountRef = useRef(0);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Generation counter — prevents stale closures from old connections
+  // from corrupting state or triggering phantom reconnects.
+  const connectionIdRef = useRef(0);
+
   // Stable refs for callbacks — updates without triggering reconnect
   const onMessageRef = useRef(onMessage);
   const onOpenRef = useRef(onOpen);
@@ -55,8 +59,17 @@ export function useWebSocket({
   const connect = useCallback(() => {
     if (!url) return;
 
+    // Mint a new generation ID — all handlers from previous connections
+    // will see a stale ID and silently bail out.
+    const thisConnectionId = ++connectionIdRef.current;
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
     if (wsRef.current) {
-      wsRef.current.close();
+      wsRef.current.close(1000, "switching");
       wsRef.current = null;
     }
 
@@ -67,32 +80,44 @@ export function useWebSocket({
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (connectionIdRef.current !== thisConnectionId) return;
         setIsConnected(true);
         reconnectCountRef.current = 0;
         onOpenRef.current?.();
       };
 
       ws.onerror = (error) => {
+        if (connectionIdRef.current !== thisConnectionId) return;
         onErrorRef.current?.(error);
       };
 
       ws.onclose = (event) => {
+        // If this closure belongs to a superseded connection, ignore it entirely.
+        // This is the core fix: without this guard, the old socket's async onclose
+        // would set isConnected=false and schedule reconnects that tear down the
+        // new, perfectly healthy connection.
+        if (connectionIdRef.current !== thisConnectionId) return;
+
         setIsConnected(false);
         onCloseRef.current?.();
 
-        if (event.code !== 1000) {
+        if (event.code !== 1000 && reconnectCountRef.current < reconnectAttempts) {
           reconnectCountRef.current++;
           const backoffDelay = Math.min(
             1000 * Math.pow(1.5, reconnectCountRef.current),
             30000,
           );
           reconnectTimeoutRef.current = setTimeout(() => {
+            // Double-check: if a newer connection was created while we waited,
+            // this reconnect is stale — don't fire it.
+            if (connectionIdRef.current !== thisConnectionId) return;
             connect();
           }, backoffDelay);
         }
       };
 
       ws.onmessage = (event) => {
+        if (connectionIdRef.current !== thisConnectionId) return;
         try {
           const message = JSON.parse(event.data) as WebSocketMessage;
           setLastMessage(message);
@@ -104,15 +129,19 @@ export function useWebSocket({
     } catch (error) {
       console.error("WebSocket connection error:", error);
     }
-  }, [url, token]);
+  }, [url, token, reconnectAttempts]);
 
   const disconnect = useCallback(() => {
+    // Bump the generation — instantly invalidates all handlers from the current connection
+    connectionIdRef.current++;
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
     }
 
     if (wsRef.current) {
-      wsRef.current.close();
+      wsRef.current.close(1000, "unmounting");
       wsRef.current = null;
     }
 
