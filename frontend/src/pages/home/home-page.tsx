@@ -31,6 +31,10 @@ interface Report {
   url: string
 }
 
+function stripEmojis(text: string) {
+  return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '').trim()
+}
+
 function parseSocialLinks(raw?: string | Record<string, string>) {
   if (typeof raw === 'object' && raw !== null) return raw
   try { return JSON.parse((raw as string) || '{}') as Record<string, string> } 
@@ -228,10 +232,10 @@ function AnnouncementList({ announcements }: { announcements: Announcement[] }) 
               </div>
               <div>
                 <h3 className="text-xl font-bold font-ginto-nord tracking-tight text-white">
-                  {announcement.title}
+                  {stripEmojis(announcement.title)}
                 </h3>
                 <p className="mt-3 text-base leading-relaxed text-neutral-400">
-                  {announcement.content}
+                  {stripEmojis(announcement.content)}
                 </p>
               </div>
             </div>
