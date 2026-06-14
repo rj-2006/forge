@@ -21,6 +21,11 @@ export function useChatHistory(chatroomId: number, params?: { page?: number; lim
       return api.get<ChatMessage[]>(`/api/chatrooms/${chatroomId}/history${query ? `?${query}` : ''}`)
     },
     enabled: !!chatroomId,
+    // Chat history is inherently volatile — messages arrive via WebSocket
+    // between visits. Always refetch when entering a room, but keep the
+    // cache briefly so old messages display instantly while fresh data loads.
+    staleTime: 0,
+    gcTime: 1000 * 30,
   })
 }
 
