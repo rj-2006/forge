@@ -9,6 +9,6 @@ cookie.txt
 cookies.txt
 test-ws.js
 test_auth.sh
-/reports/public/
+# /reports/public/
 /reports/bin/hugo*
 /reports/.hugo_build.lock

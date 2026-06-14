@@ -96,7 +96,7 @@ function TeamGrid({ team }: { team: TeamMember[] }) {
         }
       `}</style>
       
-      <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative min-h-[400px] overflow-hidden">
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative min-h-[500px] overflow-hidden">
         {/* Custom Navigation */}
         <button onClick={handlePrev} className="absolute left-2 sm:left-0 z-10 p-3 sm:p-4 bg-[#0A0A0A] text-white hover:bg-white hover:text-black transition-all">
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
