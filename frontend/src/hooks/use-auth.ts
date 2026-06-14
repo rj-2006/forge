@@ -17,22 +17,11 @@ export function useCurrentUser() {
   })
 }
 
-export function useLogin() {
+export function useGoogleLogin() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (credentials: LoginRequest) => authService.login(credentials),
-    onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.auth.user(), data.user)
-    },
-  })
-}
-
-export function useRegister() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (data: RegisterRequest) => authService.register(data),
+    mutationFn: (credential: string) => authService.loginWithGoogle(credential),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.auth.user(), data.user)
     },

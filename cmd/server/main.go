@@ -72,8 +72,7 @@ func main() {
 	}))
 
 	// Public routes
-	r.POST("/api/register", handlers.Register)
-	r.POST("/api/login", handlers.Login)
+	r.POST("/api/auth/google", handlers.GoogleLogin)
 	r.POST("/api/auth/refresh", handlers.RefreshTokenHandler)
 	r.POST("/api/auth/logout", handlers.LogoutHandler)
 	r.GET("/api/homepage", handlers.GetHomepage)

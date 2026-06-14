@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +14,7 @@ import (
 	"github.com/rj-2006/techtalk/internal/database"
 	"github.com/rj-2006/techtalk/internal/middleware"
 	"github.com/rj-2006/techtalk/internal/models"
-	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 )
 
 func issueAccessToken(user models.User) (string, error) {
@@ -76,87 +78,47 @@ func clearRefreshTokenCookie(c *gin.Context) {
 	c.SetCookie("refresh-token", "", -1, "/", "", secure, true)
 }
 
-type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=50"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+type GoogleLoginRequest struct {
+	Credential string `json:"credential" binding:"required"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-func Register(c *gin.Context) {
-	var req RegisterRequest
+func GoogleLogin(c *gin.Context) {
+	var req GoogleLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
 		return
 	}
 
-	//hashing passwords
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	payload, err := idtoken.Validate(context.Background(), req.Credential, clientID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-	user := models.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: string(hashedPassword),
-	}
-
-	if err := database.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Google token"})
 		return
 	}
 
-	accessToken, err := issueAccessToken(user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token."})
+	email, ok := payload.Claims["email"].(string)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email not provided by Google"})
 		return
 	}
 
-	refreshToken, err := issueRefreshToken(user.ID, "")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate session."})
-		return
-	}
-
-	setRefreshTokenCookie(c, refreshToken)
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "User created successfully",
-		"token":   accessToken,
-		"user": gin.H{
-			"id":       user.ID,
-			"username": user.Username,
-			"email":    user.Email,
-			"avatar":   user.Avatar,
-			"name":     user.Name,
-			"bio":      user.Bio,
-		},
-	})
-}
-
-func Login(c *gin.Context) {
-	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
-		return
-	}
+	name, _ := payload.Claims["name"].(string)
+	picture, _ := payload.Claims["picture"].(string)
 
 	var user models.User
-
-	if err := database.DB.Where("email=?", req.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
-		return
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
-		return
+	if err := database.DB.Where("email=?", email).First(&user).Error; err != nil {
+		// User doesn't exist, create them
+		user = models.User{
+			Email:    email,
+			Username: strings.Split(email, "@")[0],
+			Name:     name,
+			Avatar:   picture,
+			Password: "", // No password needed for OAuth users
+		}
+		if err := database.DB.Create(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+			return
+		}
 	}
 
 	accessToken, err := issueAccessToken(user)
@@ -213,8 +175,9 @@ func GetMe(c *gin.Context) {
 }
 
 type UpdateProfileRequest struct {
-	Name string `json:"name" binding:"max=100"`
-	Bio  string `json:"bio"`
+	Name     string `json:"name" binding:"max=100"`
+	Bio      string `json:"bio"`
+	Username string `json:"username" binding:"required,min=3,max=50"`
 }
 
 func UpdateProfile(c *gin.Context) {
@@ -230,6 +193,12 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
+	var existingUser models.User
+	if err := database.DB.Where("username = ? AND id != ?", req.Username, userID).First(&existingUser).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Username already taken"})
+		return
+	}
+
 	var user models.User
 	if err := database.DB.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User Not Found"})
@@ -238,6 +207,7 @@ func UpdateProfile(c *gin.Context) {
 
 	user.Name = req.Name
 	user.Bio = req.Bio
+	user.Username = req.Username
 
 	if err := database.DB.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})

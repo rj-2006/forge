@@ -3,16 +3,8 @@ import { useAuthStore } from '../stores/auth-store'
 import type { LoginRequest, RegisterRequest, AuthResponse, User } from '../types/api'
 
 export const authService = {
-  async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/api/login', credentials, false)
-    
-    useAuthStore.getState().login(response.user, response.token)
-    
-    return response
-  },
-
-  async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/api/register', data, false)
+  async loginWithGoogle(credential: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/api/auth/google', { credential }, false)
     
     useAuthStore.getState().login(response.user, response.token)
     

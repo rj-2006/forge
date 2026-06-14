@@ -6,7 +6,6 @@ import { ProtectedRoute } from './components/layout/protected-route'
 import { ErrorBoundary } from './components/error-boundary'
 import { NavigationLoader } from './components/navigation-loader'
 const LoginPage = lazy(() => import('./pages/auth/login-page').then((module) => ({ default: module.LoginPage })))
-const RegisterPage = lazy(() => import('./pages/auth/register-page').then((module) => ({ default: module.RegisterPage })))
 const HomePage = lazy(() => import('./pages/home/home-page').then((module) => ({ default: module.HomePage })))
 const ThreadListPage = lazy(() => import('./pages/forum/thread-list-page').then((module) => ({ default: module.ThreadListPage })))
 const ThreadDetailPage = lazy(() => import('./pages/forum/thread-detail-page').then((module) => ({ default: module.ThreadDetailPage })))
@@ -40,12 +39,6 @@ function App() {
         path="/login"
         element={
           isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
         }
       />
 

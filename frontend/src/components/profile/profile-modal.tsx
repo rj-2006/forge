@@ -17,6 +17,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const login = useAuthStore(state => state.login)
   const token = useAuthStore(state => state.token)
   
+  const [username, setUsername] = useState(user?.username || '')
   const [name, setName] = useState(user?.name || '')
   const [bio, setBio] = useState(user?.bio || '')
   const [isSaving, setIsSaving] = useState(false)
@@ -34,7 +35,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     try {
       const res = await api.put<{ message: string; user: any }>('/api/me/profile', {
         name,
-        bio
+        bio,
+        username
       })
       if (token) {
         login(res.user, token)
@@ -133,13 +135,21 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
               accept="image/jpeg, image/png, image/webp"
               onChange={handleFileChange}
             />
-            <div className="text-center">
-              <p className="text-sm font-semibold">{user?.username}</p>
+            <div className="text-center mt-3">
               <p className="text-xs text-[#888]">{user?.email}</p>
             </div>
           </div>
 
           <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-[#888]">Username</label>
+              <Input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Choose a unique username"
+                className="bg-[#111] border-[#333] focus-visible:ring-white/20 text-white placeholder:text-[#555] rounded-md h-11"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-[#888]">Display Name</label>
               <Input
