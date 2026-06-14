@@ -18,8 +18,7 @@ export function MessageInput({
   className,
 }: MessageInputProps) {
   const [content, setContent] = useState('')
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isTypingRef = useRef(false)
+  const lastTypingTimeRef = useRef<number>(0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,40 +26,19 @@ export function MessageInput({
 
     onSend(content.trim())
     setContent('')
-    
-    if (isTypingRef.current) {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-      isTypingRef.current = false
-    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
     
     if (onTyping) {
-      if (!isTypingRef.current) {
-        isTypingRef.current = true
+      const now = Date.now()
+      if (now - lastTypingTimeRef.current > 1000) {
         onTyping()
+        lastTypingTimeRef.current = now
       }
-      
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-      typingTimeoutRef.current = setTimeout(() => {
-        isTypingRef.current = false
-      }, 2000)
     }
   }
-
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-    }
-  }, [])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

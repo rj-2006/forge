@@ -47,7 +47,7 @@ export function ChatPage() {
     typingTimeoutsRef.current[username] = window.setTimeout(() => {
       setTypingUsers((prev) => prev.filter((user) => user !== username))
       delete typingTimeoutsRef.current[username]
-    }, 2000)
+    }, 2500)
   }, [userId])
 
   const handleUserLeft = useCallback((_leftUserId: number) => {
