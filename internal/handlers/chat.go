@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ var ChatHub *ws.Hub
 
 func isAllowedWebsocketOrigin(origin string) bool {
 
-	allowedOrigin := os.Getenv("APP_ORIGIN")
+	allowedOrigin := strings.TrimRight(strings.TrimSpace(os.Getenv("APP_ORIGIN")), "/")
 	if allowedOrigin != "" && origin == allowedOrigin {
 		return true
 	}

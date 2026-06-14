@@ -56,7 +56,7 @@ func main() {
 	// CORS Middleware
 	r.Use(cors.New(cors.Config{
 		AllowOriginFunc: func(origin string) bool {
-			allowedOrigin := os.Getenv("APP_ORIGIN")
+			allowedOrigin := strings.TrimRight(strings.TrimSpace(os.Getenv("APP_ORIGIN")), "/")
 			return origin == "" ||
 				(allowedOrigin != "" && origin == allowedOrigin) ||
 				strings.HasPrefix(origin, "http://localhost:") ||
