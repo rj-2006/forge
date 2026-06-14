@@ -39,8 +39,9 @@ export function LoginPage() {
       setError(null)
       await login.mutateAsync(data)
       navigate(from, { replace: true })
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Invalid credentials')
+    } catch (err: unknown) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Invalid credentials')
     }
   }
 

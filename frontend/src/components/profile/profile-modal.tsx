@@ -40,8 +40,9 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         login(res.user, token)
       }
       onClose()
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile')
+    } catch (err: unknown) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to update profile')
     } finally {
       setIsSaving(false)
     }
@@ -64,8 +65,9 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (user && token) {
         login({ ...user, avatar: res.url }, token)
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload avatar')
+    } catch (err: unknown) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to upload avatar')
     } finally {
       setIsUploading(false)
       // Reset input

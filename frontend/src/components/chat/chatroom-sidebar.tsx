@@ -39,8 +39,9 @@ export function ChatroomSidebar({
       }
       setNewChatroomName('')
       setShowCreateForm(false)
-    } catch (err: any) {
-      setError(err.message || 'Failed to create chatroom')
+    } catch (err: unknown) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to create chatroom')
     }
   }
 

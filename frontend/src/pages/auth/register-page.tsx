@@ -55,8 +55,9 @@ export function RegisterPage() {
         password: data.password,
       })
       navigate('/', { replace: true })
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Registration failed. Please try again.')
+    } catch (err: unknown) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Registration failed. Please try again.')
     }
   }
 
