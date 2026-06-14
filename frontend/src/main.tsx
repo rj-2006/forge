@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
           <ThemeProvider
             defaultTheme="system"
-            storageKey="techtalk-theme"
+            storageKey="forge-theme"
           >
             <ToastProvider>
               <AppLoader />

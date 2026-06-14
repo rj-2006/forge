@@ -12,7 +12,9 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Megaphone
+  Megaphone,
+  Menu,
+  X
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useHomepage } from '../../hooks/use-homepage'
@@ -94,14 +96,16 @@ function TeamGrid({ team }: { team: TeamMember[] }) {
         }
       `}</style>
       
-      <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative min-h-[400px]">
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative min-h-[400px] overflow-hidden">
         {/* Custom Navigation */}
-        <button onClick={handlePrev} className="absolute left-0 z-10 p-4 bg-[#0A0A0A] text-white hover:bg-white hover:text-black transition-all">
-          <ChevronLeft className="w-6 h-6" />
+        <button onClick={handlePrev} className="absolute left-2 sm:left-0 z-10 p-3 sm:p-4 bg-[#0A0A0A] text-white hover:bg-white hover:text-black transition-all">
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-        <button onClick={handleNext} className="absolute right-0 z-10 p-4 bg-[#0A0A0A] text-white hover:bg-white hover:text-black transition-all">
-          <ChevronRight className="w-6 h-6" />
+        <button onClick={handleNext} className="absolute right-2 sm:right-0 z-10 p-3 sm:p-4 bg-[#0A0A0A] text-white hover:bg-white hover:text-black transition-all">
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
+
+        <div className="scale-[0.55] sm:scale-75 md:scale-100 origin-center flex items-center justify-center">
 
         <FancyCarousel 
           images={images}
@@ -113,6 +117,7 @@ function TeamGrid({ team }: { team: TeamMember[] }) {
           autoRotateTime={0}
           transitionTime={0.8}
         />
+        </div>
       </div>
 
       <div className="w-full md:w-1/2">
@@ -289,8 +294,10 @@ function ReportsList() {
 }
 
 function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthenticated: boolean }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans overflow-x-hidden">
       {/* Ultra Minimal Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6 py-6 lg:px-10 flex items-center justify-between">
@@ -311,18 +318,35 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
               {isAuthenticated ? 'Workspace' : 'Log In'}
             </Link>
           </div>
+          <div className="md:hidden">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
+        
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-black/95 backdrop-blur-md px-6 py-6 flex flex-col gap-6 border-t border-neutral-900 absolute top-full left-0 right-0 shadow-2xl z-50">
+            <a href="#team" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Team</a>
+            <a href="#events" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Events</a>
+            <a href="#reports" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Reports</a>
+            <a href="#updates" onClick={() => setMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Updates</a>
+            <Link to={isAuthenticated ? '/app/forum' : '/login'} onClick={() => setMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-widest bg-white text-black px-6 py-4 hover:bg-neutral-200 transition-colors text-center mt-4">
+              {isAuthenticated ? 'Workspace' : 'Log In'}
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <section className="grid gap-16 lg:grid-cols-[1fr_500px] items-center">
-            <div className="max-w-3xl">
-              <h1 className="text-6xl font-black font-ginto-nord uppercase tracking-tighter text-white sm:text-7xl lg:text-8xl leading-[0.9]">
-                IMAGINE<br />A PLACE.
+            <div className="max-w-3xl text-center lg:text-left">
+              <h1 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white sm:text-7xl lg:text-8xl leading-[0.9]">
+                IMAGINE<br className="hidden sm:block" /> A PLACE.
               </h1>
-              <p className="mt-8 max-w-xl text-xl leading-relaxed text-neutral-400">
+              <p className="mt-8 max-w-xl mx-auto lg:mx-0 text-lg sm:text-xl leading-relaxed text-neutral-400">
                 {data.club.description}
               </p>
               <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -343,13 +367,13 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
                     <span className="w-2.5 h-2.5 bg-neutral-700" />
                     <span className="w-2.5 h-2.5 bg-neutral-700" />
                   </div>
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">techtalk.exe</span>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">forge.exe</span>
                   <div className="w-10" />
                 </div>
                 
                 {/* Client workspace panels */}
                 <div className="flex flex-1 overflow-hidden">
-                  <div className="w-40 bg-[#050505] p-4 flex flex-col gap-2">
+                  <div className="hidden sm:flex w-40 bg-[#050505] p-4 flex-col gap-2">
                     <span className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest mb-2">channels</span>
                     <div className="flex items-center gap-2 px-3 py-2 bg-[#111111] text-white text-xs font-bold uppercase tracking-wider">
                       <span>#</span> general
@@ -402,10 +426,10 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
         <section className="bg-[#0A0A0A] p-12 md:p-16 flex flex-col md:flex-row items-center gap-16">
           <div className="flex-1 space-y-6">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Snapshot</span>
-            <h2 className="text-4xl md:text-5xl font-black font-ginto-nord uppercase text-white tracking-tighter leading-none">
+            <h2 className="text-3xl md:text-5xl font-black font-ginto-nord uppercase text-white tracking-tighter leading-none">
               Everything in one place.
             </h2>
-            <p className="text-neutral-400 text-lg leading-relaxed max-w-xl">
+            <p className="text-neutral-400 text-base md:text-lg leading-relaxed max-w-xl">
               Directory, pinned updates, real-time events, and structured forum discussions. No borders. Pure focus.
             </p>
           </div>
@@ -476,7 +500,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
               Contact
             </a>
             <Link to={isAuthenticated ? '/app/chat' : '/login'} className="bg-white text-black px-8 py-4 font-bold uppercase tracking-widest text-sm hover:bg-neutral-200 transition-colors text-center">
-              {isAuthenticated ? 'Open Client' : 'Join TechTalk'}
+              {isAuthenticated ? 'Open Client' : 'Join Forge'}
             </Link>
           </div>
         </div>

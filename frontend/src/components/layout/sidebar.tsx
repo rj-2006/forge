@@ -95,7 +95,7 @@ export function Sidebar({
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <p className="text-sm font-semibold tracking-tight">TechTalk</p>
+            <p className="text-sm font-semibold tracking-tight">Forge</p>
             <p className="text-xs text-muted-foreground">Club workspace</p>
           </div>
         )}

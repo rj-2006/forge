@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useChatrooms, useChatHistory, useCreateChatroom } from '../../hooks/use-chat'
 import { useChatWebSocket } from '../../hooks/use-websocket'
 import { useAuthStore } from '../../stores/auth-store'
@@ -104,14 +104,20 @@ export function ChatPage() {
         isLoading={chatroomsLoading}
         onCreateChatroom={handleCreateChatroom}
         isCreating={createChatroom.isPending}
+        className={chatroomId ? 'hidden md:flex w-full md:w-60' : 'flex w-full md:w-60'}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col bg-[#36393f]">
+      <div className={cn("min-h-0 flex-1 flex-col bg-[#36393f]", !chatroomId ? 'hidden md:flex' : 'flex')}>
         <ErrorBoundary>
           {chatroomId ? (
             <>
               {/* Chat Header */}
               <div className="flex h-14 items-center gap-2 border-b border-void/50 px-4 bg-[#36393f]">
+                <Link to="/app/chat" className="md:hidden mr-2 p-1 -ml-2 text-greyple hover:text-snow">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </Link>
                 <span className="text-[#8e9297] text-xl font-normal select-none">
                   #
                 </span>

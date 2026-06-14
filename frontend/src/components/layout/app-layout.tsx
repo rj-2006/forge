@@ -92,7 +92,7 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
 
           <TopNavbar.Brand className="min-w-0">
             <div className="hidden min-w-0 lg:block">
-              <p className="truncate text-sm font-semibold tracking-tight">TechTalk Workspace</p>
+              <p className="truncate text-sm font-semibold tracking-tight">Forge Workspace</p>
               <p className="truncate text-xs text-muted-foreground">Forum, chat, and projects in one place</p>
             </div>
           </TopNavbar.Brand>
@@ -140,17 +140,16 @@ export function AuthLayout({ children, className }: { children: React.ReactNode;
   return (
     <div
       className={cn(
-        "flex min-h-screen w-full items-center justify-center",
-        "bg-[#0E0F2D] bg-[radial-gradient(circle_at_top,rgba(88,101,242,0.15),transparent_45%)] p-4",
+        "flex min-h-screen w-full items-center justify-center bg-black p-4 selection:bg-white selection:text-black font-sans",
         className
       )}
     >
       <div className="w-full max-w-md">
-        <div className="mb-6 flex flex-col items-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blurple shadow-md shadow-blurple/20">
-            <span className="text-2xl font-black text-snow select-none">T</span>
+        <div className="mb-6 flex flex-col items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center bg-white text-black shadow-lg">
+            <span className="text-3xl font-black select-none">T</span>
           </div>
-          <span className="text-xl font-extrabold tracking-tight font-ginto-nord text-snow uppercase">TechTalk</span>
+          <span className="text-xl font-black tracking-tighter font-ginto-nord text-white uppercase">Forge</span>
         </div>
         {children}
       </div>

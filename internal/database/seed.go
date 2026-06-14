@@ -30,13 +30,13 @@ func seedClubConfig() {
 	}
 
 	club := models.ClubConfig{
-		Name:         "Devign",
-		Tagline:      "Where Design Meets Development",
-		Description:  "Devign is a student-run tech club bridging the gap between design thinking and software development. We build real products, host workshops, run hackathons, and foster a community of creators who believe great software starts with great design.",
-		LogoURL:      "/Devign logo v1 pngV.png",
-		SocialLinks:  models.SocialLinks{"github":"https://github.com/devign-club","discord":"https://discord.gg/devign","twitter":"https://twitter.com/devignclub","instagram":"https://instagram.com/devignclub","linkedin":"https://linkedin.com/company/devign"},
+		Name:         "Forge",
+		Tagline:      "Where Builders Unite",
+		Description:  "Forge is a student-run tech club where creators, designers, and developers come together to build real products. We host workshops, run hackathons, and foster a community of people who love building.",
+		LogoURL:      "/Forge logo v1 pngV.png",
+		SocialLinks:  models.SocialLinks{"github":"https://github.com/forge-club","discord":"https://discord.gg/forge","twitter":"https://twitter.com/forgeclub","instagram":"https://instagram.com/forgeclub","linkedin":"https://linkedin.com/company/forge"},
 		FoundingYear: 2024,
-		ContactEmail: "hello@devign.club",
+		ContactEmail: "hello@forge.club",
 	}
 
 	if err := DB.Create(&club).Error; err != nil {
@@ -131,7 +131,7 @@ func seedEvents() {
 			Status:      "upcoming",
 		},
 		{
-			Title:       "Devign Hackathon '25",
+			Title:       "Forge Hackathon '25",
 			Description: "48-hour hackathon where design meets code. Teams of 3–4 build a product from concept to MVP. Prizes, mentors, food, and lots of caffeine.",
 			Date:        now.AddDate(0, 1, 0),
 			EndDate:     now.AddDate(0, 1, 2),
@@ -151,7 +151,7 @@ func seedEvents() {
 			Title:       "Weekly Standup & Code Review",
 			Description: "Our open weekly session where members demo what they've built, get code reviews, and collaborate on club projects.",
 			Date:        now.AddDate(0, 0, 7),
-			Location:    "Devign HQ (Room 118)",
+			Location:    "Forge HQ (Room 118)",
 			EventType:   "meetup",
 			Status:      "upcoming",
 		},
@@ -176,8 +176,8 @@ func seedAnnouncements() {
 	var user models.User
 	if err := DB.First(&user).Error; err != nil {
 		user = models.User{
-			Username: "devign-bot",
-			Email:    "bot@devign.club",
+			Username: "forge-bot",
+			Email:    "bot@forge.club",
 			Password: "$2a$10$c59tXYhmjoub86.ehMV/4e407e9w0w3WZdCCVjlYgiLHNIetG7aVu", // password123
 		}
 		DB.Create(&user)
@@ -185,8 +185,8 @@ func seedAnnouncements() {
 
 	announcements := []models.Announcement{
 		{
-			Title:    "🚀 Devign Platform is Live!",
-			Content:  "Welcome to the new Devign platform! Explore our forum, join chat rooms, and connect with fellow designers and developers. This is just the beginning — more features are on the way.",
+			Title:    "🚀 Forge Platform is Live!",
+			Content:  "Welcome to the new Forge platform! Explore our forum, join chat rooms, and connect with fellow designers and developers. This is just the beginning — more features are on the way.",
 			Priority: "high",
 			IsPinned: true,
 			AuthorID: user.ID,
@@ -200,7 +200,7 @@ func seedAnnouncements() {
 		},
 		{
 			Title:    "🏆 Hackathon Signups Open",
-			Content:  "Devign Hackathon '25 signups are now open! Form your team of 3–4 and register before spots fill up. This year's theme: 'Design for Impact'.",
+			Content:  "Forge Hackathon '25 signups are now open! Form your team of 3–4 and register before spots fill up. This year's theme: 'Design for Impact'.",
 			Priority: "urgent",
 			IsPinned: true,
 			AuthorID: user.ID,
