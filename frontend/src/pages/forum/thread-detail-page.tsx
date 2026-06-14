@@ -11,6 +11,8 @@ import { cn, resolveAssetUrl } from '../../lib/utils'
 import { ReactionButton } from '../../components/forum/reaction-button'
 import { ThreadDetailSkeleton } from '../../components/forum/thread-skeleton'
 import { EmptyState } from '../../components/layout/protected-route'
+import { UserProfileModal } from '../../components/profile/user-profile-modal'
+import type { User } from '../../types/api'
 import React from 'react'
 
 export function ThreadDetailPage() {
@@ -24,7 +26,9 @@ export function ThreadDetailPage() {
   const addReaction = useAddReaction(threadId)
   const removeReaction = useRemoveReaction(threadId)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const userId = useAuthStore((state) => state.user?.id)
+  const currentUser = useAuthStore((state) => state.user)
+  const userId = currentUser?.id
+  const [profileUser, setProfileUser] = useState<User | null>(null)
 
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,16 +114,23 @@ export function ThreadDetailPage() {
 
           <article className="rounded-xl border border-dim-grey/30 bg-dark-charcoal p-6 shadow-md">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm">
-                {thread.user?.username?.charAt(0)?.toUpperCase() || 'A'}
-              </div>
+              <button
+                onClick={() => setProfileUser(userId === thread.user_id && currentUser ? currentUser : thread.user)}
+                className="flex h-10 w-10 overflow-hidden items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm hover:ring-2 hover:ring-white/50 transition-all cursor-pointer"
+              >
+                {(userId === thread.user_id && currentUser ? currentUser.avatar : thread.user?.avatar) ? (
+                  <img src={resolveAssetUrl(userId === thread.user_id && currentUser ? currentUser.avatar : thread.user?.avatar)} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  thread.user?.username?.charAt(0)?.toUpperCase() || 'A'
+                )}
+              </button>
               <div>
-                <Link
-                  to={`/user/${thread.user?.username}`}
-                  className="font-bold text-snow hover:underline"
+                <button
+                  onClick={() => setProfileUser(userId === thread.user_id && currentUser ? currentUser : thread.user)}
+                  className="font-bold text-snow hover:underline cursor-pointer"
                 >
                   {thread.user?.username}
-                </Link>
+                </button>
                 <p className="text-xs font-semibold text-greyple">
                   {formatDistanceToNow(new Date(thread.created_at), { addSuffix: true })}
                 </p>
@@ -161,21 +172,21 @@ export function ThreadDetailPage() {
             </h2>
 
             {isAuthenticated ? (
-              <form onSubmit={handleSubmitPost} className="rounded-xl border border-dim-grey/30 bg-dark-charcoal p-4 space-y-3">
+              <form onSubmit={handleSubmitPost} className="rounded-xl bg-[#2b2d31] p-4 space-y-3 shadow-sm border border-[#1e1f22]">
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
                   placeholder="Write a reply..."
                   className={cn(
-                    'flex w-full rounded-md border border-dim-grey bg-void px-3 py-2 text-sm text-snow placeholder:text-greyple',
-                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blurple focus:border-blurple',
-                    'min-h-[100px]'
+                    'flex w-full resize-none rounded-lg bg-[#383a40] px-4 py-3 text-sm text-snow placeholder:text-[#878a91]',
+                    'focus-visible:outline-none focus-visible:ring-0',
+                    'min-h-[120px]'
                   )}
                 />
                 <div className="flex justify-end">
                   <Button 
                     type="submit" 
-                    className="bg-blurple hover:bg-dark-blurple text-snow font-bold text-sm px-4 py-2 rounded shadow-sm transition-colors"
+                    className="bg-blurple hover:bg-[#4752C4] text-white font-bold text-sm px-6 py-2 rounded-md transition-colors"
                     disabled={!newPost.trim() || createPost.isPending}
                   >
                     Send Reply
@@ -195,16 +206,23 @@ export function ThreadDetailPage() {
                 {thread.posts.map((post) => (
                   <article key={post.id} className="rounded-xl border border-dim-grey/30 bg-dark-charcoal/80 p-4 transition-all hover:bg-dark-charcoal">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blurple text-snow font-bold text-xs select-none">
-                        {post.user?.username?.charAt(0)?.toUpperCase() || 'A'}
-                      </div>
+                      <button
+                        onClick={() => setProfileUser(userId === post.user_id && currentUser ? currentUser : post.user)}
+                        className="flex h-8 w-8 overflow-hidden items-center justify-center rounded-full bg-blurple text-snow font-bold text-xs select-none hover:ring-2 hover:ring-white/50 transition-all cursor-pointer"
+                      >
+                        {(userId === post.user_id && currentUser ? currentUser.avatar : post.user?.avatar) ? (
+                          <img src={resolveAssetUrl(userId === post.user_id && currentUser ? currentUser.avatar : post.user?.avatar)} alt="Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                          post.user?.username?.charAt(0)?.toUpperCase() || 'A'
+                        )}
+                      </button>
                       <div>
-                        <Link
-                          to={`/user/${post.user?.username}`}
-                          className="font-bold text-snow hover:underline text-sm"
+                        <button
+                          onClick={() => setProfileUser(userId === post.user_id && currentUser ? currentUser : post.user)}
+                          className="font-bold text-snow hover:underline text-sm cursor-pointer"
                         >
                           {post.user?.username}
-                        </Link>
+                        </button>
                         <p className="text-[10px] font-semibold text-greyple">
                           {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                         </p>
@@ -223,6 +241,7 @@ export function ThreadDetailPage() {
         </div>
         </ErrorBoundary>
       </PageContent>
+      <UserProfileModal user={profileUser} isOpen={!!profileUser} onClose={() => setProfileUser(null)} />
     </PageContainer>
   )
 }

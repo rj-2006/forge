@@ -83,6 +83,7 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/me", handlers.GetMe)
+		protected.PUT("/me/profile", handlers.UpdateProfile)
 		// Forum
 		protected.POST("/threads", handlers.CreateThread)
 		protected.GET("/threads", handlers.GetThreads)
@@ -112,6 +113,7 @@ func main() {
 
 	// Serve static files
 	r.Static("/uploads", "./uploads")
+	r.Static("/reports", "./reports/public")
 
 	port := os.Getenv("PORT")
 	if port == "" {

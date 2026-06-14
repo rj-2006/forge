@@ -1,0 +1,4 @@
+baseURL = "/reports/"
+title = "TechTalk Reports"
+[outputs]
+  home = ["HTML", "JSON"]

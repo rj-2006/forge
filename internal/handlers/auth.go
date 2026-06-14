@@ -134,6 +134,8 @@ func Register(c *gin.Context) {
 			"username": user.Username,
 			"email":    user.Email,
 			"avatar":   user.Avatar,
+			"name":     user.Name,
+			"bio":      user.Bio,
 		},
 	})
 }
@@ -178,6 +180,8 @@ func Login(c *gin.Context) {
 			"username": user.Username,
 			"email":    user.Email,
 			"avatar":   user.Avatar,
+			"name":     user.Name,
+			"bio":      user.Bio,
 		},
 	})
 }
@@ -202,6 +206,53 @@ func GetMe(c *gin.Context) {
 			"username": user.Username,
 			"email":    user.Email,
 			"avatar":   user.Avatar,
+			"name":     user.Name,
+			"bio":      user.Bio,
+		},
+	})
+}
+
+type UpdateProfileRequest struct {
+	Name string `json:"name" binding:"max=100"`
+	Bio  string `json:"bio"`
+}
+
+func UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User Not Found"})
+		return
+	}
+
+	user.Name = req.Name
+	user.Bio = req.Bio
+
+	if err := database.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Profile updated successfully",
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.Username,
+			"email":    user.Email,
+			"avatar":   user.Avatar,
+			"name":     user.Name,
+			"bio":      user.Bio,
 		},
 	})
 }

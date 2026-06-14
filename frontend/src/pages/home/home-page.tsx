@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import FancyCarousel from 'react-fancy-circular-carousel'
 import 'react-fancy-circular-carousel/FancyCarousel.css'
@@ -20,6 +20,14 @@ import { useAuthStore } from '../../stores/auth-store'
 import { resolveAssetUrl } from '../../lib/utils'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '../../components/ui/avatar'
 import type { Announcement, Event, HomepageData, TeamMember } from '../../types/api'
+
+interface Report {
+  title: string
+  description: string
+  date: string
+  slug: string
+  url: string
+}
 
 function parseSocialLinks(raw?: string | Record<string, string>) {
   if (typeof raw === 'object' && raw !== null) return raw
@@ -239,6 +247,47 @@ function AnnouncementList({ announcements }: { announcements: Announcement[] }) 
   )
 }
 
+function ReportsList() {
+  const [reports, setReports] = useState<Report[]>([])
+  
+  useEffect(() => {
+    fetch(resolveAssetUrl('/reports/index.json'))
+      .then(res => res.json())
+      .then(data => {
+        // Sort descending by date
+        data.sort((a: Report, b: Report) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        setReports(data)
+      })
+      .catch(console.error)
+  }, [])
+
+  if (reports.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      {reports.slice(0, 3).map((report) => (
+        <div key={report.slug} className="bg-[#0A0A0A] p-6 hover:bg-[#111111] transition-colors flex flex-col md:flex-row gap-6">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xl font-bold font-ginto-nord tracking-tight text-white">{report.title}</h3>
+            <div className="mt-2 text-sm text-neutral-500 font-bold uppercase tracking-widest">
+              {format(new Date(report.date), 'MMMM d, yyyy')}
+            </div>
+            <p className="mt-3 text-base leading-relaxed text-neutral-400">{report.description}</p>
+            <a href={resolveAssetUrl(report.url)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white hover:text-neutral-300">
+              Read Report <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      ))}
+      <div className="pt-4">
+        <a href={resolveAssetUrl('/reports/events/')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full bg-[#111111] text-white px-6 py-4 font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors">
+          View All Past Events
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthenticated: boolean }) {
   return (
     <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
@@ -256,6 +305,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
           <div className="hidden items-center gap-8 md:flex">
             <a href="#team" className="text-sm font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Team</a>
             <a href="#events" className="text-sm font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Events</a>
+            <a href="#reports" className="text-sm font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Reports</a>
             <a href="#updates" className="text-sm font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors">Updates</a>
             <Link to={isAuthenticated ? '/app/forum' : '/login'} className="text-sm font-bold uppercase tracking-widest bg-white text-black px-6 py-3 hover:bg-neutral-200 transition-colors">
               {isAuthenticated ? 'Workspace' : 'Log In'}
@@ -391,6 +441,14 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
             <h2 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white">Actions</h2>
           </div>
           <EventList events={data.events} />
+        </section>
+
+        <section id="reports" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)] scroll-mt-32">
+          <div className="space-y-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Reports</span>
+            <h2 className="text-5xl font-black font-ginto-nord uppercase tracking-tighter text-white">Past Events</h2>
+          </div>
+          <ReportsList />
         </section>
 
         <section id="updates" className="grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)] scroll-mt-32">

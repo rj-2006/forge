@@ -1,11 +1,12 @@
 import * as React from 'react'
-import { Bell, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../stores/auth-store'
 import { Sidebar } from './sidebar'
 import { TopNavbar } from './top-navbar'
+import { ProfileModal } from '../profile/profile-modal'
 
 const HomeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,6 +40,8 @@ const defaultNavSections = [
 export function AppLayout({ children, className }: { children?: React.ReactNode; className?: string }) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const [showProfileModal, setShowProfileModal] = React.useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = React.useState(false)
   const navigate = useNavigate()
   
   const { user, logout } = useAuthStore()
@@ -50,11 +53,12 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
 
   return (
     <div className={cn('flex h-screen w-full bg-background', className)}>
-      <div className="hidden lg:block">
+      <div className="hidden lg:block h-full">
         <Sidebar
           collapsed={sidebarCollapsed}
           onCollapsedChange={setSidebarCollapsed}
           navSections={defaultNavSections}
+          className="h-full"
         />
       </div>
 
@@ -96,15 +100,30 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
           <TopNavbar.Search placeholder="Search discussions" className="ml-auto" />
 
           <TopNavbar.Content>
-            <TopNavbar.Action label="Notifications">
-              <Bell className="h-4 w-4" />
-            </TopNavbar.Action>
-            <TopNavbar.User 
-              name={user?.username || "User"} 
-              email={user?.email}
-              avatar={user?.avatar}
-              onClick={handleLogout}
-            />
+            <div className="relative">
+              <TopNavbar.User 
+                name={user?.username || "User"} 
+                email={user?.email}
+                avatar={user?.avatar}
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              />
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md bg-[#111] border border-[#333] shadow-lg py-1 z-50">
+                  <button 
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#222] font-semibold transition-colors" 
+                    onClick={() => { setUserDropdownOpen(false); setShowProfileModal(true); }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button 
+                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#222] font-semibold transition-colors" 
+                    onClick={() => { setUserDropdownOpen(false); handleLogout(); }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </TopNavbar.Content>
         </TopNavbar>
 
@@ -112,6 +131,7 @@ export function AppLayout({ children, className }: { children?: React.ReactNode;
           {children || <Outlet />}
         </div>
       </div>
+      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </div>
   )
 }

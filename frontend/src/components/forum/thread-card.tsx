@@ -4,6 +4,8 @@ import { cn, resolveAssetUrl } from '../../lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import type { Thread } from '../../types/api'
 import { ReactionButton } from './reaction-button'
+import { UserProfileModal } from '../profile/user-profile-modal'
+import { useAuthStore } from '../../stores/auth-store'
 
 interface ThreadCardProps {
   thread: Thread
@@ -22,6 +24,12 @@ export function ThreadCard({
   currentUserId,
   className,
 }: ThreadCardProps) {
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const currentUser = useAuthStore(state => state.user)
+  const isActuallyOwn = currentUser?.id === thread.user_id
+  const displayUser = isActuallyOwn && currentUser ? currentUser : thread.user
+  const username = displayUser?.username || 'Unknown'
+  const initial = username.charAt(0).toUpperCase()
   const reactions = React.useMemo(() => {
     const reactionMap = new Map<string, { emoji: string; count: number; hasReacted: boolean }>()
     
@@ -57,21 +65,28 @@ export function ThreadCard({
       <div className="flex gap-4">
         {/* Vote/Avatar column */}
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm">
-            {thread.user?.username?.charAt(0)?.toUpperCase() || 'A'}
-          </div>
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex h-10 w-10 overflow-hidden items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm hover:ring-2 hover:ring-white/50 transition-all cursor-pointer"
+          >
+            {displayUser?.avatar ? (
+              <img src={resolveAssetUrl(displayUser.avatar)} alt={username} className="h-full w-full object-cover" />
+            ) : (
+              initial
+            )}
+          </button>
         </div>
 
         {/* Content column */}
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-center gap-2 text-xs font-semibold text-greyple">
-            <Link
-              to={`/user/${thread.user?.username}`}
-              className="text-snow hover:underline font-bold"
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="text-snow hover:underline font-bold cursor-pointer"
             >
-              {thread.user?.username}
-            </Link>
+              {username}
+            </button>
             <span>•</span>
             <span>{formatDistanceToNow(new Date(thread.created_at), { addSuffix: true })}</span>
           </div>
@@ -149,6 +164,11 @@ export function ThreadCard({
           </div>
         </div>
       </div>
+      <UserProfileModal 
+        user={displayUser} 
+        isOpen={profileOpen} 
+        onClose={() => setProfileOpen(false)} 
+      />
     </article>
   )
 }
