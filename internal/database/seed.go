@@ -32,7 +32,7 @@ func seedClubConfig() {
 	club := models.ClubConfig{
 		Name:         "Forge",
 		Tagline:      "Where Builders Unite",
-		Description:  "Forge is a student-run tech club where creators, designers, and developers come together to build real products. We host workshops, run hackathons, and foster a community of people who love building.",
+		Description:  "We're a college tech club. We build stuff, break stuff, and occasionally ship stuff. If you like making things with code or design, you'll fit in here.",
 		LogoURL:      "/Forge logo v1 pngV.png",
 		SocialLinks:  models.SocialLinks{"github":"https://github.com/forge-club","discord":"https://discord.gg/forge","twitter":"https://twitter.com/forgeclub","instagram":"https://instagram.com/forgeclub","linkedin":"https://linkedin.com/company/forge"},
 		FoundingYear: 2024,
@@ -185,22 +185,22 @@ func seedAnnouncements() {
 
 	announcements := []models.Announcement{
 		{
-			Title:    "🚀 Forge Platform is Live!",
-			Content:  "Welcome to the new Forge platform! Explore our forum, join chat rooms, and connect with fellow designers and developers. This is just the beginning — more features are on the way.",
+			Title:    "The Forge platform is live",
+			Content:  "We finally shipped it. Forum, chat, the whole thing. Poke around, break things, let us know what sucks. More features coming soon.",
 			Priority: "high",
 			IsPinned: true,
 			AuthorID: user.ID,
 		},
 		{
-			Title:    "📝 Registrations Paused",
-			Content:  "We've temporarily paused new member registrations while we onboard our current batch. If you're interested, drop us an email and we'll add you to the waitlist.",
+			Title:    "New member signups are paused",
+			Content:  "We're at capacity for this batch. If you want in, shoot us an email and we'll put you on the waitlist for next round.",
 			Priority: "normal",
 			IsPinned: true,
 			AuthorID: user.ID,
 		},
 		{
-			Title:    "🏆 Hackathon Signups Open",
-			Content:  "Forge Hackathon '25 signups are now open! Form your team of 3–4 and register before spots fill up. This year's theme: 'Design for Impact'.",
+			Title:    "Hackathon signups are open",
+			Content:  "Forge Hackathon '25 — teams of 3-4, 48 hours, theme is 'Design for Impact'. Register before we run out of spots.",
 			Priority: "urgent",
 			IsPinned: true,
 			AuthorID: user.ID,

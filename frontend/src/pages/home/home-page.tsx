@@ -256,10 +256,12 @@ function ReportsList() {
   const [reports, setReports] = useState<Report[]>([])
   
   useEffect(() => {
-    fetch(resolveAssetUrl('/reports/index.json'))
-      .then(res => res.json())
+    fetch('/reports/index.json')
+      .then(res => {
+        if (!res.ok) throw new Error(`Reports fetch failed: ${res.status}`)
+        return res.json()
+      })
       .then(data => {
-        // Sort descending by date
         data.sort((a: Report, b: Report) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setReports(data)
       })
@@ -278,14 +280,14 @@ function ReportsList() {
               {format(new Date(report.date), 'MMMM d, yyyy')}
             </div>
             <p className="mt-3 text-base leading-relaxed text-neutral-400">{report.description}</p>
-            <a href={resolveAssetUrl(report.url)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white hover:text-neutral-300">
+            <a href={report.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white hover:text-neutral-300">
               Read Report <ArrowRight className="h-4 w-4" />
             </a>
           </div>
         </div>
       ))}
       <div className="pt-4">
-        <a href={resolveAssetUrl('/reports/events/')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full bg-[#111111] text-white px-6 py-4 font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors">
+        <a href="/reports/events/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full bg-[#111111] text-white px-6 py-4 font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors">
           View All Past Events
         </a>
       </div>
@@ -297,7 +299,7 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans overflow-x-hidden" style={{ WebkitTapHighlightColor: 'transparent' }}>
       {/* Ultra Minimal Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6 py-6 lg:px-10 flex items-center justify-between">
@@ -417,20 +419,20 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
 
       <main className="mx-auto max-w-7xl space-y-32 px-6 py-20 lg:px-10">
         <section className="grid gap-1 md:grid-cols-2 xl:grid-cols-4 bg-black">
-          <StatCard icon={<Users className="h-5 w-5" />} label="Active members" value={String(data.stats.total_members)} helper="Student builders" />
-          <StatCard icon={<MessageSquareText className="h-5 w-5" />} label="Discussions" value={String(data.stats.total_threads)} helper="Shared knowledge" />
-          <StatCard icon={<CalendarDays className="h-5 w-5" />} label="Events" value={String(data.stats.total_events)} helper="Hackathons" />
-          <StatCard icon={<Hash className="h-5 w-5" />} label="Spaces" value={String(data.stats.total_chatrooms)} helper="Focused rooms" />
+          <StatCard icon={<Users className="h-5 w-5" />} label="Members" value={String(data.stats.total_members)} helper="and counting" />
+          <StatCard icon={<MessageSquareText className="h-5 w-5" />} label="Threads" value={String(data.stats.total_threads)} helper="across the forum" />
+          <StatCard icon={<CalendarDays className="h-5 w-5" />} label="Events" value={String(data.stats.total_events)} helper="this semester" />
+          <StatCard icon={<Hash className="h-5 w-5" />} label="Channels" value={String(data.stats.total_chatrooms)} helper="for everything" />
         </section>
 
         <section className="bg-[#0A0A0A] p-12 md:p-16 flex flex-col md:flex-row items-center gap-16">
           <div className="flex-1 space-y-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">Snapshot</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 block">What's inside</span>
             <h2 className="text-3xl md:text-5xl font-black font-ginto-nord uppercase text-white tracking-tighter leading-none">
-              Everything in one place.
+              One place for all of it.
             </h2>
             <p className="text-neutral-400 text-base md:text-lg leading-relaxed max-w-xl">
-              Directory, pinned updates, real-time events, and structured forum discussions. No borders. Pure focus.
+              Chat, forums, event pages, and announcements. No switching tabs, no digging through group chats.
             </p>
           </div>
           <div className="w-full md:w-96 bg-black p-8">

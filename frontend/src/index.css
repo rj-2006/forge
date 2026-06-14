@@ -174,3 +174,21 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-greyple);
 }
+
+/* Prevent accidental text selection on mobile taps */
+button,
+a,
+[role="button"],
+nav,
+header,
+.stat-card {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection only in content areas */
+article, p, h1, h2, h3, h4, h5, h6, span, li {
+  -webkit-user-select: text;
+  user-select: text;
+}
