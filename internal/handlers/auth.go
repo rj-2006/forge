@@ -70,11 +70,13 @@ func issueRefreshToken(userID uint, familyID string) (string, error) {
 
 func setRefreshTokenCookie(c *gin.Context, token string) {
 	secure := os.Getenv("ENV") == "production" || os.Getenv("APP_ENV") == "production"
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie("refresh-token", token, int(7*24*time.Hour/time.Second), "/", "", secure, true)
 }
 
 func clearRefreshTokenCookie(c *gin.Context) {
 	secure := os.Getenv("ENV") == "production" || os.Getenv("APP_ENV") == "production"
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie("refresh-token", "", -1, "/", "", secure, true)
 }
 
