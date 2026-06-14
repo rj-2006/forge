@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Bell, LogOut, Search } from 'lucide-react'
-import { Avatar } from '../ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { cn, resolveAssetUrl } from '../../lib/utils'
@@ -118,12 +118,10 @@ export function TopNavbarUser({
       className={cn('h-auto gap-3 rounded-xl px-2 py-2', className)}
       aria-label={onClick ? `User menu: ${name}` : undefined}
     >
-      <Avatar
-        src={resolveAssetUrl(avatar)}
-        alt={name || 'User avatar'}
-        fallback={name}
-        size="sm"
-      />
+      <Avatar className="size-8">
+        <AvatarImage src={resolveAssetUrl(avatar)} alt={name || 'User avatar'} />
+        <AvatarFallback>{name?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+      </Avatar>
       <div className="hidden min-w-0 flex-col items-start text-left text-sm lg:flex">
         <span className="font-medium">{name}</span>
         {email && (

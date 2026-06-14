@@ -121,18 +121,16 @@ export function AuthLayout({ children, className }: { children: React.ReactNode;
     <div
       className={cn(
         "flex min-h-screen w-full items-center justify-center",
-        "bg-background p-4",
+        "bg-[#0E0F2D] bg-[radial-gradient(circle_at_top,rgba(88,101,242,0.15),transparent_45%)] p-4",
         className
       )}
     >
       <div className="w-full max-w-md">
-        <div className="mb-8 flex justify-center">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <span className="text-xl font-bold text-primary-foreground">T</span>
-            </div>
-            <span className="text-xl font-semibold">TechTalk</span>
+        <div className="mb-6 flex flex-col items-center gap-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blurple shadow-md shadow-blurple/20">
+            <span className="text-2xl font-black text-snow select-none">T</span>
           </div>
+          <span className="text-xl font-extrabold tracking-tight font-ginto-nord text-snow uppercase">TechTalk</span>
         </div>
         {children}
       </div>

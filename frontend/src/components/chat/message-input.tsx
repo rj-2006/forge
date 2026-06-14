@@ -72,9 +72,9 @@ export function MessageInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn('border-t bg-background p-4', className)}
+      className={cn('bg-transparent px-4 pb-6 pt-1', className)}
     >
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3 rounded-lg bg-[#40444b] px-4 py-2.5">
         <textarea
           value={content}
           onChange={handleChange}
@@ -83,13 +83,17 @@ export function MessageInput({
           disabled={disabled}
           rows={1}
           className={cn(
-            'flex max-h-32 min-h-[40px] w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm',
-            'placeholder:text-muted-foreground',
-            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+            'flex max-h-32 min-h-[24px] w-full resize-none bg-transparent text-sm text-snow placeholder:text-[#72767d]',
+            'focus-visible:outline-none border-0 focus:ring-0 p-0',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
         />
-        <Button type="submit" size="icon" disabled={disabled || !content.trim()}>
+        <Button 
+          type="submit" 
+          size="icon" 
+          className="h-8 w-8 shrink-0 bg-transparent hover:bg-[#35393e] text-greyple hover:text-snow transition-colors rounded-full"
+          disabled={disabled || !content.trim()}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4"
@@ -100,7 +104,7 @@ export function MessageInput({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
             />
           </svg>

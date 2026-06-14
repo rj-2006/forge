@@ -15,11 +15,11 @@ export function TypingIndicator({ users, className }: TypingIndicatorProps) {
     : `${users[0]} and ${users.length - 1} others are typing`
 
   return (
-    <div className={cn('flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground', className)}>
+    <div className={cn('flex items-center gap-2 px-4 py-1 text-xs text-[#b9bbbe] font-ginto font-medium', className)}>
       <div className="flex gap-1">
-        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60" style={{ animationDelay: '0ms' }} />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60" style={{ animationDelay: '150ms' }} />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60" style={{ animationDelay: '300ms' }} />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dcddde]/70" style={{ animationDelay: '0ms' }} />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dcddde]/70" style={{ animationDelay: '150ms' }} />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#dcddde]/70" style={{ animationDelay: '300ms' }} />
       </div>
       <span>{text}...</span>
     </div>

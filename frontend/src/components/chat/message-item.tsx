@@ -13,7 +13,6 @@ interface MessageItemProps {
 
 export function MessageItem({
   message,
-  isOwn = false,
   showAvatar = true,
   showUsername = true,
   className,
@@ -21,50 +20,38 @@ export function MessageItem({
   return (
     <div
       className={cn(
-        'group flex gap-3 px-4 py-1 hover:bg-accent/50',
-        isOwn && 'flex-row-reverse',
+        'group flex gap-4 px-4 py-1.5 hover:bg-[#32353b]/40 transition-colors',
         className
       )}
     >
-      {showAvatar && !isOwn && (
-        <div className="flex-shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+      <div className="flex-shrink-0 w-10 flex justify-center">
+        {showAvatar ? (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm">
             {message.user?.username?.charAt(0)?.toUpperCase() || 'A'}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="w-10" />
+        )}
+      </div>
       
-      <div className={cn('flex max-w-[70%] flex-col', isOwn && 'items-end')}>
-        {showUsername && !isOwn && (
-          <div className="flex items-center gap-2 mb-1">
+      <div className="flex-1 min-w-0">
+        {showUsername && (
+          <div className="flex items-baseline gap-2 mb-0.5">
             <Link
               to={`/user/${message.user?.username}`}
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-bold text-snow hover:underline font-ginto"
             >
               {message.user?.username}
             </Link>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[10px] font-semibold text-[#8e9297]">
               {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
             </span>
           </div>
         )}
         
-        <div
-          className={cn(
-            'rounded-lg px-3 py-2 text-sm',
-            isOwn
-              ? 'bg-primary text-primary-foreground rounded-tr-none'
-              : 'bg-muted rounded-tl-none'
-          )}
-        >
-          <p className="whitespace-pre-wrap">{message.content}</p>
-        </div>
-        
-        {isOwn && (
-          <span className="mt-1 text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-          </span>
-        )}
+        <p className="text-sm text-[#dcddde] whitespace-pre-wrap leading-relaxed font-ginto">
+          {message.content}
+        </p>
       </div>
     </div>
   )

@@ -1,14 +1,49 @@
-import * as React from 'react'
-import * as AvatarPrimitive from '@radix-ui/react-avatar'
-import { cn } from '../../lib/utils'
+import * as React from "react"
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
-interface AvatarProps {
-  src?: string
-  alt?: string
-  fallback?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  className?: string
-}
+import { cn } from "@/lib/utils"
+
+const Avatar = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      className
+    )}
+    {...props}
+  />
+))
+Avatar.displayName = AvatarPrimitive.Root.displayName
+
+const AvatarImage = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Image>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Image
+    ref={ref}
+    className={cn("aspect-square h-full w-full", className)}
+    {...props}
+  />
+))
+AvatarImage.displayName = AvatarPrimitive.Image.displayName
+
+const AvatarFallback = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Fallback>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Fallback
+    ref={ref}
+    className={cn(
+      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      className
+    )}
+    {...props}
+  />
+))
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
 const avatarSizes = {
   xs: 'h-6 w-6 text-xs',
@@ -18,40 +53,14 @@ const avatarSizes = {
   xl: 'h-16 w-16 text-xl',
 }
 
-export function Avatar({ src, alt, fallback, size = 'md', className }: AvatarProps) {
-  return (
-    <AvatarPrimitive.Root
-      className={cn(
-        'relative flex shrink-0 overflow-hidden rounded-full bg-primary text-primary-foreground',
-        avatarSizes[size],
-        className,
-      )}
-    >
-      {src ? (
-        <AvatarPrimitive.Image
-          src={src}
-          alt={alt || 'User avatar'}
-          className="aspect-square h-full w-full object-cover"
-        />
-      ) : null}
-      <AvatarPrimitive.Fallback
-        className="flex h-full w-full items-center justify-center font-medium"
-        delayMs={200}
-      >
-        {fallback?.charAt(0)?.toUpperCase() || '?'}
-      </AvatarPrimitive.Fallback>
-    </AvatarPrimitive.Root>
-  )
-}
-
 interface AvatarGroupProps {
   children: React.ReactNode
   max?: number
-  size?: AvatarProps['size']
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 
-export function AvatarGroup({ children, max = 4, size = 'sm', className }: AvatarGroupProps) {
+function AvatarGroup({ children, max = 4, size = 'sm', className }: AvatarGroupProps) {
   const childArray = React.Children.toArray(children)
   const visible = childArray.slice(0, max)
   const remaining = childArray.length - max
@@ -76,3 +85,5 @@ export function AvatarGroup({ children, max = 4, size = 'sm', className }: Avata
     </div>
   )
 }
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup }

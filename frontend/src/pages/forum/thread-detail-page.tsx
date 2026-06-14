@@ -72,7 +72,7 @@ export function ThreadDetailPage() {
 
   if (isLoading) {
     return (
-      <PageContainer>
+      <PageContainer className="bg-not-quite-black flex-1 overflow-auto">
         <PageContent>
           <ThreadDetailSkeleton />
         </PageContent>
@@ -82,7 +82,7 @@ export function ThreadDetailPage() {
 
   if (error || !thread) {
     return (
-      <PageContainer>
+      <PageContainer className="bg-not-quite-black flex-1 overflow-auto">
         <PageContent>
           <EmptyState
             title="Thread not found"
@@ -94,39 +94,39 @@ export function ThreadDetailPage() {
   }
 
   return (
-    <PageContainer>
-      <PageContent>
+    <PageContainer className="bg-not-quite-black flex-1 overflow-auto p-0">
+      <PageContent className="px-6 py-8">
         <ErrorBoundary>
         <div className="max-w-4xl mx-auto space-y-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(-1)}
-            className="gap-2"
+            className="gap-2 text-[#8e9297] hover:text-snow hover:bg-transparent"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            Back to forum
           </Button>
 
-          <article className="rounded-lg border bg-card p-6">
+          <article className="rounded-xl border border-dim-grey/30 bg-dark-charcoal p-6 shadow-md">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-medium">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blurple text-snow text-base font-bold select-none shadow-sm">
                 {thread.user?.username?.charAt(0)?.toUpperCase() || 'A'}
               </div>
               <div>
                 <Link
                   to={`/user/${thread.user?.username}`}
-                  className="font-medium hover:underline"
+                  className="font-bold text-snow hover:underline"
                 >
                   {thread.user?.username}
                 </Link>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs font-semibold text-greyple">
                   {formatDistanceToNow(new Date(thread.created_at), { addSuffix: true })}
                 </p>
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold mb-4">{thread.title}</h1>
+            <h1 className="text-2xl font-black font-ginto-nord uppercase tracking-tight text-snow mb-4">{thread.title}</h1>
 
             {thread.images && thread.images.length > 0 && (
               <div className="mb-4 grid grid-cols-2 gap-2">
@@ -136,7 +136,7 @@ export function ThreadDetailPage() {
                     src={resolveAssetUrl(image.url)}
                     alt={image.caption || ''}
                     className={cn(
-                      'rounded-md object-cover',
+                      'rounded-md object-cover bg-void border border-dim-grey/20',
                       thread.images!.length === 1 ? 'max-h-96 w-full' : 'h-48 w-full'
                     )}
                     onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -145,7 +145,7 @@ export function ThreadDetailPage() {
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-4 border-t">
+            <div className="flex items-center gap-2 pt-4 border-t border-dim-grey/30">
               <ReactionButton
                 reactions={reactions}
                 onAddReaction={handleAddReaction}
@@ -156,63 +156,66 @@ export function ThreadDetailPage() {
           </article>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg font-bold font-ginto text-snow">
               {thread.posts?.length || 0} {thread.posts?.length === 1 ? 'Reply' : 'Replies'}
             </h2>
 
             {isAuthenticated ? (
-              <form onSubmit={handleSubmitPost} className="rounded-lg border bg-card p-4">
+              <form onSubmit={handleSubmitPost} className="rounded-xl border border-dim-grey/30 bg-dark-charcoal p-4 space-y-3">
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
                   placeholder="Write a reply..."
                   className={cn(
-                    'flex w-full rounded-md border-0 bg-transparent px-3 py-2 text-sm',
-                    'placeholder:text-muted-foreground',
-                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                    'flex w-full rounded-md border border-dim-grey bg-void px-3 py-2 text-sm text-snow placeholder:text-greyple',
+                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blurple focus:border-blurple',
                     'min-h-[100px]'
                   )}
                 />
-                <div className="flex justify-end mt-2">
-                  <Button type="submit" disabled={!newPost.trim() || createPost.isPending}>
-                    Reply
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit" 
+                    className="bg-blurple hover:bg-dark-blurple text-snow font-bold text-sm px-4 py-2 rounded shadow-sm transition-colors"
+                    disabled={!newPost.trim() || createPost.isPending}
+                  >
+                    Send Reply
                   </Button>
                 </div>
               </form>
             ) : (
-              <div className="rounded-lg border bg-card p-4 text-center">
-                <p className="text-muted-foreground">
-                  <Link to="/login" className="text-primary hover:underline">Sign in</Link> to reply
+              <div className="rounded-xl border border-dim-grey/30 bg-dark-charcoal p-5 text-center text-sm text-greyple font-medium">
+                <p>
+                  You must <Link to="/login" className="text-vivid-cerulean hover:underline font-bold">sign in</Link> to post a reply.
                 </p>
               </div>
             )}
 
             {thread.posts && thread.posts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {thread.posts.map((post) => (
-                  <article key={post.id} className="rounded-lg border bg-card p-4">
+                  <article key={post.id} className="rounded-xl border border-dim-grey/30 bg-dark-charcoal/80 p-4 transition-all hover:bg-dark-charcoal">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-medium text-sm">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blurple text-snow font-bold text-xs select-none">
                         {post.user?.username?.charAt(0)?.toUpperCase() || 'A'}
                       </div>
                       <div>
                         <Link
                           to={`/user/${post.user?.username}`}
-                          className="font-medium hover:underline text-sm"
+                          className="font-bold text-snow hover:underline text-sm"
                         >
                           {post.user?.username}
                         </Link>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[10px] font-semibold text-greyple">
                           {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                         </p>
                       </div>
                     </div>
-                    <p className="text-sm whitespace-pre-wrap">{post.content}</p>
+                    <p className="text-sm text-fog whitespace-pre-wrap leading-relaxed">{post.content}</p>
                   </article>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">
+              <p className="text-center text-greyple font-semibold py-8 text-sm">
                 No replies yet. Be the first to respond!
               </p>
             )}

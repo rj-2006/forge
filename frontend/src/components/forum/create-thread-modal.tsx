@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { cn } from '../../lib/utils'
+import { FieldGroup, Field, FieldLabel, FieldError } from '../ui/field'
+import { Spinner } from '../ui/spinner'
 
 const threadSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(200, 'Title must be less than 200 characters'),
@@ -54,7 +56,7 @@ export function CreateThreadModal({
       return
     }
     setImages((prev) => [...prev, ...files])
-    
+
     const newUrls = files.map((file) => URL.createObjectURL(file))
     setPreviewUrls((prev) => [...prev, ...newUrls])
   }
@@ -86,10 +88,10 @@ export function CreateThreadModal({
       {/* Modal */}
       <div className="relative z-10 w-full max-w-lg rounded-xl border bg-background p-6 shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Create Thread</h2>
+          <h2 className="text-xl font-semibold text-snow">Create Thread</h2>
           <button
             onClick={handleClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent text-greyple"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,34 +111,37 @@ export function CreateThreadModal({
               {error}
             </div>
           )}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Title</label>
-            <Input
-              {...register('title')}
-              placeholder="What's your thread about?"
-              error={errors.title?.message}
-            />
-          </div>
+
+          <FieldGroup className="gap-4">
+            <Field data-invalid={!!errors.title}>
+              <FieldLabel className="text-sm font-medium text-snow">Title</FieldLabel>
+              <Input
+                {...register('title')}
+                placeholder="What's your thread about?"
+                aria-invalid={!!errors.title}
+                className="bg-void border-dim-grey text-snow focus-visible:ring-blurple placeholder:text-greyple h-10"
+              />
+              <FieldError className="text-xs text-destructive font-semibold">{errors.title?.message}</FieldError>
+            </Field>
+
+            <Field data-invalid={!!errors.content}>
+              <FieldLabel className="text-sm font-medium text-snow">Content (optional)</FieldLabel>
+              <textarea
+                {...register('content')}
+                placeholder="Share more details..."
+                aria-invalid={!!errors.content}
+                className={cn(
+                  'flex min-h-[120px] w-full rounded-md border border-dim-grey bg-void px-3 py-2 text-sm text-snow placeholder:text-greyple',
+                  'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blurple focus:border-blurple',
+                  errors.content && 'border-destructive'
+                )}
+              />
+              <FieldError className="text-xs text-destructive font-semibold">{errors.content?.message}</FieldError>
+            </Field>
+          </FieldGroup>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Content (optional)</label>
-            <textarea
-              {...register('content')}
-              placeholder="Share more details..."
-              className={cn(
-                'flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm',
-                'placeholder:text-muted-foreground',
-                'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                errors.content && 'border-destructive'
-              )}
-            />
-            {errors.content && (
-              <p className="text-xs text-destructive">{errors.content.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Images (optional, max 4)</label>
+            <label className="text-sm font-medium text-snow">Images (optional, max 4)</label>
             <div className="flex flex-wrap gap-2">
               {previewUrls.map((url, index) => (
                 <div key={index} className="relative">
@@ -161,7 +166,7 @@ export function CreateThreadModal({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed hover:bg-accent"
+                  className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed border-dim-grey hover:bg-accent hover:border-blurple/45 transition-colors"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -186,10 +191,11 @@ export function CreateThreadModal({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" variant="outline" className="border-dim-grey text-snow hover:bg-muted" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" loading={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-blurple hover:bg-dark-blurple text-snow font-bold gap-2">
+              {isLoading && <Spinner className="text-snow" />}
               Create Thread
             </Button>
           </div>

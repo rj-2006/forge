@@ -45,15 +45,15 @@ export function ChatroomSidebar({
   }
 
   return (
-    <div className={cn('flex w-60 flex-col border-r bg-card', className)}>
+    <div className={cn('flex w-60 flex-col border-r border-void/50 bg-[#2f3136] text-greyple', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b p-4">
-        <h2 className="font-semibold">Chatrooms</h2>
+      <div className="flex h-14 items-center justify-between border-b border-void/50 px-4">
+        <h2 className="text-xs font-black uppercase tracking-wider text-snow font-ginto-nord">Chatrooms</h2>
         {onCreateChatroom && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-7 w-7 text-greyple hover:text-snow hover:bg-transparent"
             onClick={() => setShowCreateForm(!showCreateForm)}
           >
             <svg
@@ -63,7 +63,7 @@ export function ChatroomSidebar({
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
             </svg>
           </Button>
         )}
@@ -71,22 +71,29 @@ export function ChatroomSidebar({
 
       {/* Create Form */}
       {showCreateForm && (
-        <form onSubmit={handleCreate} className="border-b p-3 space-y-2">
-          {error && <div className="text-xs text-destructive">{error}</div>}
+        <form onSubmit={handleCreate} className="border-b border-void/50 p-3 space-y-2 bg-void/25">
+          {error && <div className="text-xs text-ekko-red font-semibold">{error}</div>}
           <Input
             value={newChatroomName}
             onChange={(e) => setNewChatroomName(e.target.value)}
-            placeholder="Chatroom name"
+            placeholder="new-chatroom"
+            className="bg-void border-dim-grey text-snow placeholder:text-greyple h-9 text-sm focus-visible:ring-blurple"
             disabled={isCreating}
           />
           <div className="flex gap-2">
-            <Button type="submit" size="sm" disabled={isCreating || !newChatroomName.trim()}>
+            <Button 
+              type="submit" 
+              size="sm" 
+              className="bg-blurple hover:bg-dark-blurple text-snow rounded px-3 py-1 text-xs font-bold"
+              disabled={isCreating || !newChatroomName.trim()}
+            >
               Create
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
+              className="text-greyple hover:text-snow text-xs"
               onClick={() => {
                 setShowCreateForm(false)
                 setError(null)
@@ -100,11 +107,11 @@ export function ChatroomSidebar({
 
       {/* Chatroom List */}
       <ScrollArea className="flex-1">
-        <div className="p-2">
+        <div className="p-2 space-y-0.5">
           {isLoading ? (
             <div className="space-y-1 p-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-9 animate-pulse rounded-md bg-muted" />
+                <div key={i} className="h-8 animate-pulse rounded bg-dark-charcoal" />
               ))}
             </div>
           ) : chatrooms.length > 0 ? (
@@ -113,20 +120,18 @@ export function ChatroomSidebar({
                 key={chatroom.id}
                 to={`/app/chat/${chatroom.id}`}
                 className={cn(
-                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                  'flex items-center gap-1.5 rounded px-2.5 py-1.5 text-sm font-semibold transition-colors',
                   currentChatroomId === chatroom.id
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-[#35393e] text-snow'
+                    : 'text-[#8e9297] hover:bg-[#35393e]/40 hover:text-[#dcddde]'
                 )}
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs">
-                  #
-                </span>
+                <span className="text-[#8e9297] text-lg font-normal">#</span>
                 <span className="truncate">{chatroom.name}</span>
               </Link>
             ))
           ) : (
-            <p className="p-4 text-center text-sm text-muted-foreground">
+            <p className="p-4 text-center text-xs text-greyple">
               No chatrooms yet
             </p>
           )}

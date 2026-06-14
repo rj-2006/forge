@@ -5,7 +5,6 @@ import {
   Clock3,
   ExternalLink,
   Hash,
-  Mail,
   Megaphone,
   MessageSquareText,
   Sparkles,
@@ -16,8 +15,8 @@ import { useHomepage } from '../../hooks/use-homepage'
 import { useAuthStore } from '../../stores/auth-store'
 import { resolveAssetUrl } from '../../lib/utils'
 import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Avatar, AvatarGroup } from '../../components/ui/avatar'
+import { Card, CardContent } from '../../components/ui/card'
+import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '../../components/ui/avatar'
 import type { Announcement, Event, HomepageData, TeamMember } from '../../types/api'
 
 function parseSocialLinks(raw?: string | Record<string, string>) {
@@ -56,15 +55,15 @@ function StatCard({
   helper: string
 }) {
   return (
-    <Card className="border-border/70 bg-white/80 shadow-sm shadow-black/5 backdrop-blur-sm transition-colors hover:border-border">
+    <Card className="border-dim-grey/30 bg-dark-charcoal/80 shadow-md backdrop-blur-sm transition-all hover:border-blurple/50">
       <CardContent className="flex items-start gap-4 p-6">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-muted/60 text-foreground">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-dim-grey/40 bg-void text-blurple">
           {icon}
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-          <p className="text-sm text-muted-foreground">{helper}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-fog">{label}</p>
+          <p className="text-3xl font-black font-ginto-nord tracking-tight text-snow">{value}</p>
+          <p className="text-sm text-greyple">{helper}</p>
         </div>
       </CardContent>
     </Card>
@@ -81,25 +80,22 @@ function TeamGrid({ team }: { team: TeamMember[] }) {
         return (
           <Card
             key={member.id}
-            className="group overflow-hidden border-border/70 bg-white/85 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="group overflow-hidden border-dim-grey/30 bg-dark-charcoal/85 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:border-blurple/40"
           >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <Avatar
-                  src={resolveAssetUrl(member.avatar_url)}
-                  alt={member.name}
-                  fallback={member.name}
-                  size="lg"
-                  className="ring-1 ring-border/80"
-                />
+                <Avatar className="size-12 ring-2 ring-blurple/30">
+                  <AvatarImage src={resolveAssetUrl(member.avatar_url)} alt={member.name} />
+                  <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-base font-semibold text-foreground">{member.name}</h3>
-                      <p className="mt-1 text-sm text-primary">{member.role}</p>
+                      <h3 className="text-base font-extrabold font-ginto-nord uppercase tracking-tight text-snow">{member.name}</h3>
+                      <p className="mt-1 text-sm font-semibold text-blurple">{member.role}</p>
                     </div>
                   </div>
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-fog">
                     {member.bio}
                   </p>
                   {Object.entries(socials).length > 0 && (
@@ -110,7 +106,7 @@ function TeamGrid({ team }: { team: TeamMember[] }) {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                          className="inline-flex items-center gap-1 rounded-full border border-dim-grey/30 bg-void px-2.5 py-1 text-xs font-medium text-greyple transition-colors hover:border-blurple/40 hover:text-snow"
                         >
                           <span>{socialLabel(platform)}</span>
                           <ExternalLink className="h-3 w-3" />
@@ -136,38 +132,38 @@ function EventList({ events }: { events: Event[] }) {
         return (
           <Card
             key={event.id}
-            className="border-border/70 bg-white/85 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="border-dim-grey/30 bg-dark-charcoal/85 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:border-blurple/40"
           >
             <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-start">
-              <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl border border-border/70 bg-muted/60 text-center">
-                <span className="text-2xl font-semibold leading-none text-foreground">{format(eventDate, 'd')}</span>
-                <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl border border-dim-grey/30 bg-void text-center">
+                <span className="text-2xl font-black font-ginto-nord leading-none text-snow">{format(eventDate, 'd')}</span>
+                <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-fog">
                   {format(eventDate, 'MMM')}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-primary/15 bg-primary/8 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                  <span className="rounded-full border border-blurple/30 bg-blurple/10 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-blurple">
                     {event.event_type}
                   </span>
-                  <span className="rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="rounded-full border border-dim-grey/30 bg-void px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-spring-green">
                     {event.status}
                   </span>
                 </div>
-                <h3 className="mt-3 text-lg font-semibold tracking-tight text-foreground">{event.title}</h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{event.description}</p>
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <h3 className="mt-3 text-lg font-bold font-ginto-nord tracking-tight text-snow">{event.title}</h3>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-fog">{event.description}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-greyple">
                   <span className="inline-flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" />
+                    <CalendarDays className="h-4 w-4 text-blurple" />
                     {format(eventDate, 'EEE, MMM d')}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <Clock3 className="h-4 w-4" />
+                    <Clock3 className="h-4 w-4 text-blurple" />
                     {format(eventDate, 'h:mm a')}
                   </span>
                   {event.location && (
                     <span className="inline-flex items-center gap-1.5">
-                      <Hash className="h-4 w-4" />
+                      <Hash className="h-4 w-4 text-blurple" />
                       {event.location}
                     </span>
                   )}
@@ -187,41 +183,41 @@ function AnnouncementList({ announcements }: { announcements: Announcement[] }) 
       {announcements.slice(0, 4).map((announcement) => (
         <Card
           key={announcement.id}
-          className="border-border/70 bg-white/85 shadow-sm shadow-black/5 transition-all duration-200 hover:border-primary/20"
+          className="border-dim-grey/30 bg-dark-charcoal/85 shadow-md transition-all duration-200 hover:border-blurple/40"
         >
           <CardContent className="p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {announcement.is_pinned && (
-                    <span className="rounded-full border border-primary/15 bg-primary/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                    <span className="rounded-full border border-fuchsia/30 bg-fuchsia/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-fuchsia">
                       Pinned
                     </span>
                   )}
-                  <span className="rounded-full border border-border/70 bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <span className="rounded-full border border-dim-grey/30 bg-void px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-greyple">
                     {announcement.priority}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground">
+                  <h3 className="text-lg font-bold font-ginto-nord tracking-tight text-snow">
                     {announcement.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-2 text-sm leading-6 text-fog">
                     {announcement.content}
                   </p>
                 </div>
               </div>
-              <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-muted/60 text-foreground md:flex">
+              <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-dim-grey/30 bg-void text-blurple md:flex">
                 <Megaphone className="h-5 w-5" />
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-greyple">
               <span className="inline-flex items-center gap-1.5">
-                <Users className="h-4 w-4" />
+                <Users className="h-4 w-4 text-blurple" />
                 {announcement.author?.username || 'Club team'}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Clock3 className="h-4 w-4" />
+                <Clock3 className="h-4 w-4 text-blurple" />
                 {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}
               </span>
             </div>
@@ -233,257 +229,267 @@ function AnnouncementList({ announcements }: { announcements: Announcement[] }) 
 }
 
 function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthenticated: boolean }) {
-  const socials = parseSocialLinks(data.club.social_links)
-  const yearsActive = Math.max(1, new Date().getFullYear() - data.club.founding_year)
-
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_22%,#f8fafc_100%)] text-foreground">
-      <div className="relative overflow-hidden border-b border-border/70 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.10),transparent_32%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.92))]">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
-        <div className="relative mx-auto max-w-7xl px-6 py-6 lg:px-10">
-          <header className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-white shadow-sm shadow-black/5">
-                <img
-                  src={resolveAssetUrl(data.club.logo_url || '/Devign logo v1 pngV.png')}
-                  alt={data.club.name}
-                  className="h-7 w-auto"
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-semibold tracking-tight text-foreground">{data.club.name}</p>
-                <p className="text-sm text-muted-foreground">{data.club.tagline}</p>
-              </div>
+    <div className="min-h-screen bg-[#0E0F2D] text-snow">
+      {/* Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0E0F2D]/80 backdrop-blur-md border-b border-dim-grey/20">
+        <div className="mx-auto max-w-7xl px-6 py-4 lg:px-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blurple shadow-md shadow-blurple/20">
+              <span className="text-xl font-black text-snow select-none">T</span>
             </div>
-            <div className="hidden items-center gap-2 md:flex">
-              <Button variant="ghost" asChild>
-                <a href="#team">Team</a>
-              </Button>
-              <Button variant="ghost" asChild>
-                <a href="#events">Events</a>
-              </Button>
-              <Button variant="ghost" asChild>
-                <a href="#updates">Updates</a>
-              </Button>
-              <Button asChild>
-                <Link to={isAuthenticated ? '/app/forum' : '/login'}>
-                  {isAuthenticated ? 'Open workspace' : 'Member sign in'}
-                </Link>
-              </Button>
+            <div>
+              <p className="text-sm font-extrabold font-ginto-nord uppercase tracking-tight text-snow">{data.club.name}</p>
+              <p className="text-xs text-fog">{data.club.tagline}</p>
             </div>
-          </header>
+          </div>
+          <div className="hidden items-center gap-4 md:flex">
+            <a href="#team" className="text-sm font-medium text-fog hover:text-snow transition-colors">Team</a>
+            <a href="#events" className="text-sm font-medium text-fog hover:text-snow transition-colors">Events</a>
+            <a href="#updates" className="text-sm font-medium text-fog hover:text-snow transition-colors">Updates</a>
+            <Button asChild className="bg-snow text-not-quite-black hover:bg-off-white font-bold rounded-xl px-4 py-2 text-sm transition-all">
+              <Link to={isAuthenticated ? '/app/forum' : '/login'}>
+                {isAuthenticated ? 'Open Workspace' : 'Log In'}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-          <section className="grid gap-12 py-16 lg:grid-cols-[minmax(0,1.2fr)_420px] lg:py-24">
+      {/* Hero Section */}
+      <div className="relative pt-24 overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(88,101,242,0.15),transparent_40%),radial-gradient(circle_at_top_right,rgba(235,69,158,0.1),transparent_35%)]">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] opacity-40" />
+        <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-10">
+          <section className="grid gap-12 py-12 lg:grid-cols-[minmax(0,1.2fr)_480px] lg:py-20 items-center">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-white/80 px-3 py-1.5 text-sm text-muted-foreground shadow-sm shadow-black/5 backdrop-blur-sm">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Student-led club platform for builders, designers, and organizers
+              <div className="inline-flex items-center gap-2 rounded-full border border-dim-grey/30 bg-dark-charcoal/60 px-4.5 py-2 text-sm text-fog shadow-md backdrop-blur-sm">
+                <Sparkles className="h-4 w-4 text-blurple animate-pulse" />
+                <span>The ultimate workspace for builders & designers</span>
               </div>
-              <h1 className="mt-6 max-w-3xl text-5xl font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                A home for your club, not just another forum.
+              <h1 className="mt-6 max-w-3xl text-5xl font-black font-ginto-nord uppercase tracking-[-0.01em] text-snow sm:text-6xl lg:text-7xl leading-[0.95]">
+                IMAGINE A PLACE...
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-fog font-ginto font-normal">
                 {data.club.description}
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" asChild className="h-11 rounded-xl px-6">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <Button size="lg" asChild className="h-12 bg-blurple hover:bg-dark-blurple text-snow rounded-xl px-8 font-bold transition-all shadow-lg shadow-blurple/20">
                   <Link to={isAuthenticated ? '/app/forum' : '/login'}>
-                    {isAuthenticated ? 'Go to forum' : 'Sign in to continue'}
+                    {isAuthenticated ? 'Go to workspace' : 'Open in Browser'}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="h-11 rounded-xl px-6">
+                <Button size="lg" variant="outline" asChild className="h-12 border-snow text-snow hover:bg-snow hover:text-void rounded-xl px-8 font-bold transition-all">
                   <a href="#events">
                     See upcoming events
                   </a>
                 </Button>
               </div>
-              <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  {data.club.contact_email}
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  Est. {data.club.founding_year}
-                </span>
-              </div>
             </div>
 
-            <div className="grid gap-4">
-              <Card className="overflow-hidden border-border/70 bg-white/85 shadow-lg shadow-slate-900/5 backdrop-blur-sm">
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full border border-primary/15 bg-primary/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-                      Club snapshot
-                    </span>
-                    <span className="text-sm text-muted-foreground">{yearsActive} year{yearsActive > 1 ? 's' : ''} active</span>
+            {/* Simulated Client Mockup */}
+            <div className="relative w-full max-w-lg mx-auto lg:mx-0">
+              {/* Outer macOS style client window */}
+              <div className="w-full rounded-2xl bg-void border border-dim-grey/40 shadow-2xl overflow-hidden flex flex-col h-96">
+                {/* Top window bar */}
+                <div className="h-10 bg-dark-charcoal border-b border-void flex items-center px-4 justify-between">
+                  <div className="flex gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
                   </div>
-                  <CardTitle className="text-2xl tracking-tight">Everything members need in one place</CardTitle>
-                  <CardDescription className="text-sm leading-6">
-                    Leadership, announcements, events, and a dedicated collaboration space designed like a real product.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
-                      <p className="text-sm text-muted-foreground">Members</p>
-                      <p className="mt-2 text-2xl font-semibold tracking-tight">{data.stats.total_members}</p>
+                  <span className="text-xs font-bold text-greyple font-mono">techtalk-client.app</span>
+                  <div className="w-10" />
+                </div>
+                
+                {/* Client workspace panels */}
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Left Mock Sidebar */}
+                  <div className="w-36 bg-dark-charcoal/70 border-r border-void/50 p-2 flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-greyple uppercase tracking-wider px-2 mb-1">channels</span>
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#35393e] text-snow text-xs font-medium">
+                      <span>#</span> general
                     </div>
-                    <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
-                      <p className="text-sm text-muted-foreground">Discussions</p>
-                      <p className="mt-2 text-2xl font-semibold tracking-tight">{data.stats.total_threads}</p>
+                    <div className="flex items-center gap-1.5 px-2 py-1 text-greyple hover:text-snow text-xs font-medium">
+                      <span>#</span> help-desk
                     </div>
-                  </div>
-                  <div className="rounded-2xl border border-border/70 bg-slate-950 p-5 text-slate-50">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-slate-300">Core team</p>
-                      <span className="text-sm text-slate-400">{data.team.length} active</span>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between gap-4">
-                      <AvatarGroup>
-                        {data.team.slice(0, 4).map((member) => (
-                          <Avatar
-                            key={member.id}
-                            src={resolveAssetUrl(member.avatar_url)}
-                            alt={member.name}
-                            fallback={member.name}
-                            size="md"
-                            className="ring-slate-950"
-                          />
-                        ))}
-                      </AvatarGroup>
-                      <p className="max-w-[180px] text-right text-sm text-slate-300">
-                        Join structured discussions, event updates, and project collaboration.
-                      </p>
+                    <div className="flex items-center gap-1.5 px-2 py-1 text-greyple hover:text-snow text-xs font-medium">
+                      <span>#</span> showcase
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              {Object.keys(socials).length > 0 && (
-                <Card className="border-border/70 bg-white/80 shadow-sm shadow-black/5">
-                  <CardContent className="flex flex-wrap items-center gap-2 p-4">
-                    {Object.entries(socials).map(([platform, url]) => (
-                      <a
-                        key={platform}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
-                      >
-                        {socialLabel(platform)}
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
+                  {/* Main Mock Chat Stream */}
+                  <div className="flex-1 bg-not-quite-black p-4 flex flex-col justify-end gap-3 font-ginto">
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-8 h-8 rounded-full bg-blurple flex items-center justify-center text-xs font-bold text-snow">BOT</div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-extrabold text-snow">TechTalk Bot</span>
+                          <span className="text-[9px] text-greyple">Today at 4:00 AM</span>
+                        </div>
+                        <p className="text-xs text-fog mt-0.5">Welcome! Start coding together, discussing ideas in the forums, and planning events.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-snow">U</div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-extrabold text-snow">NewMember</span>
+                          <span className="text-[9px] text-greyple">Today at 4:02 AM</span>
+                        </div>
+                        <p className="text-xs text-fog mt-0.5">Hello team! Excited to join this awesome workspace.</p>
+                      </div>
+                    </div>
+
+                    <div className="h-8 rounded-lg bg-dark-charcoal border border-void/30 flex items-center px-3 mt-2">
+                      <span className="text-xs text-greyple">Message #general</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Decorative Mascot overlapping client */}
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-tr from-fuchsia to-blurple rounded-full blur-md opacity-40 z-[-1]" />
+              <div className="absolute -top-6 -left-6 w-24 h-24 bg-blurple/20 rounded-full blur-lg z-[-1]" />
             </div>
           </section>
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl space-y-20 px-6 py-16 lg:px-10 lg:py-20">
+      <main className="mx-auto max-w-7xl space-y-24 px-6 py-16 lg:px-10 lg:py-24">
+        {/* Stats Section */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             icon={<Users className="h-5 w-5" />}
             label="Active members"
             value={String(data.stats.total_members)}
-            helper="Student builders and designers in the community"
+            helper="Student builders and designers"
           />
           <StatCard
             icon={<MessageSquareText className="h-5 w-5" />}
             label="Forum threads"
             value={String(data.stats.total_threads)}
-            helper="Shared knowledge, project updates, and async discussion"
+            helper="Shared knowledge and updates"
           />
           <StatCard
             icon={<CalendarDays className="h-5 w-5" />}
             label="Events hosted"
             value={String(data.stats.total_events)}
-            helper="Workshops, talks, hackathons, and weekly club sessions"
+            helper="Hackathons and talks"
           />
           <StatCard
             icon={<Hash className="h-5 w-5" />}
             label="Chat spaces"
             value={String(data.stats.total_chatrooms)}
-            helper="Focused rooms for collaboration and member coordination"
+            helper="Focused rooms for cooperation"
           />
         </section>
 
+        {/* Feature showcase card */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-blurple to-fuchsia rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-8 border border-snow/10">
+          <div className="flex-1 space-y-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-snow/80 bg-snow/10 px-3 py-1 rounded-full w-max block">
+              Club Snapshot
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black font-ginto-nord uppercase text-snow tracking-tight leading-none">
+              Everything members need in one place
+            </h2>
+            <p className="text-snow/90 text-sm md:text-base leading-relaxed max-w-lg font-ginto">
+              Leadership directory, pinned updates, real-time events tracker, and structured forum discussions to keep everything organized.
+            </p>
+          </div>
+          <div className="w-full md:w-80 bg-void/40 backdrop-blur-md p-6 rounded-2xl border border-snow/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-fog mb-4">Core Team Status</h4>
+            <div className="flex items-center justify-between gap-4">
+              <AvatarGroup>
+                {data.team.slice(0, 4).map((member) => (
+                  <Avatar
+                    key={member.id}
+                    className="size-10 ring-2 ring-background ring-dark-charcoal"
+                  >
+                    <AvatarImage src={resolveAssetUrl(member.avatar_url)} alt={member.name} />
+                    <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+              <span className="text-xs font-bold text-spring-green bg-spring-green/10 px-2.5 py-1 rounded-full">
+                {data.team.length} Active
+              </span>
+            </div>
+            <p className="text-xs text-greyple mt-4">Active contributors shape daily programs and manage chat spaces.</p>
+          </div>
+        </section>
+
+        {/* Team Section */}
         <section id="team" className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-border/70 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="inline-flex rounded-full border border-dim-grey/30 bg-dark-charcoal px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-fog">
               Leadership
             </span>
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              The people shaping the club experience.
+            <h2 className="text-3xl font-extrabold font-ginto-nord uppercase tracking-tight text-snow sm:text-4xl">
+              Meet the organizers
             </h2>
-            <p className="text-base leading-7 text-muted-foreground">
-              A visible leadership section builds trust. It shows who runs programs, who members can reach out to, and what the club stands behind.
+            <p className="text-base leading-7 text-fog font-ginto">
+              Our active officers curate workshops, maintain resources, and coordinate with student groups.
             </p>
           </div>
           <TeamGrid team={data.team} />
         </section>
 
+        {/* Events Section */}
         <section id="events" className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-border/70 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="inline-flex rounded-full border border-dim-grey/30 bg-dark-charcoal px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-fog">
               Events
             </span>
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Program your community around real moments.
+            <h2 className="text-3xl font-extrabold font-ginto-nord uppercase tracking-tight text-snow sm:text-4xl">
+              Upcoming Actions
             </h2>
-            <p className="text-base leading-7 text-muted-foreground">
-              Upcoming events should be obvious and easy to scan. This section gives your club a live operational heartbeat, not just a static brochure.
+            <p className="text-base leading-7 text-fog font-ginto">
+              Join active workshops, tech sessions, hackathons, and weekly meetups.
             </p>
           </div>
           <EventList events={data.events} />
         </section>
 
+        {/* Updates Section */}
         <section id="updates" className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-border/70 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="inline-flex rounded-full border border-dim-grey/30 bg-dark-charcoal px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-fog">
               Updates
             </span>
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Keep important information visible.
+            <h2 className="text-3xl font-extrabold font-ginto-nord uppercase tracking-tight text-snow sm:text-4xl">
+              Latest Bulletin
             </h2>
-            <p className="text-base leading-7 text-muted-foreground">
-              Announcements need more weight than ordinary posts. Pinned updates, deadline changes, and program news belong in a dedicated lane.
+            <p className="text-base leading-7 text-fog font-ginto">
+              Keep track of deadline announcements, schedule updates, and notifications.
             </p>
           </div>
           <AnnouncementList announcements={data.announcements} />
         </section>
       </main>
 
-      <footer className="border-t border-border/70 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+      {/* Footer Navigation */}
+      <footer className="border-t border-dim-grey/20 bg-dark-charcoal/50 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70 bg-white shadow-sm shadow-black/5">
-              <img
-                src={resolveAssetUrl(data.club.logo_url || '/Devign logo v1 pngV.png')}
-                alt={data.club.name}
-                className="h-7 w-auto"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blurple shadow-md shadow-blurple/20">
+              <span className="text-2xl font-black text-snow select-none">T</span>
             </div>
             <div>
-              <p className="text-base font-semibold tracking-tight text-foreground">{data.club.name}</p>
-              <p className="text-sm text-muted-foreground">{data.club.tagline}</p>
+              <p className="text-base font-extrabold font-ginto-nord uppercase tracking-tight text-snow">{data.club.name}</p>
+              <p className="text-sm text-fog">{data.club.tagline}</p>
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button variant="outline" asChild className="rounded-xl">
+            <Button variant="outline" asChild className="border-dim-grey/40 text-snow hover:bg-void rounded-xl">
               <a href={`mailto:${data.club.contact_email}`}>
-                Contact the club
+                Contact Team
               </a>
             </Button>
-            <Button asChild className="rounded-xl">
+            <Button asChild className="bg-blurple hover:bg-dark-blurple text-snow rounded-xl">
               <Link to={isAuthenticated ? '/app/chat' : '/login'}>
-                {isAuthenticated ? 'Open chatrooms' : 'Sign in'}
+                {isAuthenticated ? 'Open Client' : 'Join TechTalk'}
               </Link>
             </Button>
           </div>
@@ -495,14 +501,14 @@ function HomeShell({ data, isAuthenticated }: { data: HomepageData; isAuthentica
 
 function LoadingState() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_35%,#f8fafc_100%)] px-6">
-      <Card className="w-full max-w-md border-border/70 bg-white/90 shadow-lg shadow-black/5">
+    <div className="flex min-h-screen items-center justify-center bg-[#0E0F2D] px-6">
+      <Card className="w-full max-w-md border-dim-grey/30 bg-dark-charcoal text-snow shadow-xl p-2 rounded-xl">
         <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-          <div className="h-11 w-11 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+          <div className="h-11 w-11 animate-spin rounded-full border-4 border-blurple/20 border-t-blurple" />
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">Loading homepage</h2>
-            <p className="text-sm text-muted-foreground">
-              Pulling the latest club information, events, and announcements.
+            <h2 className="text-lg font-bold font-ginto-nord tracking-tight text-snow uppercase">Loading workspace</h2>
+            <p className="text-sm text-fog">
+              Pulling latest club information, events, and bulletins.
             </p>
           </div>
         </CardContent>
@@ -513,15 +519,15 @@ function LoadingState() {
 
 function ErrorState() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_35%,#f8fafc_100%)] px-6">
-      <Card className="w-full max-w-lg border-border/70 bg-white/90 shadow-lg shadow-black/5">
+    <div className="flex min-h-screen items-center justify-center bg-[#0E0F2D] px-6">
+      <Card className="w-full max-w-lg border-dim-grey/30 bg-dark-charcoal text-snow shadow-xl p-2 rounded-xl">
         <CardContent className="p-8 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70 bg-muted/50 text-foreground">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-dim-grey/30 bg-void text-ekko-red">
             <Megaphone className="h-5 w-5" />
           </div>
-          <h2 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">Homepage unavailable</h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            The club data could not be loaded right now. Check the API connection or try again in a moment.
+          <h2 className="mt-5 text-2xl font-bold font-ginto-nord tracking-tight text-snow uppercase">Workspace Unavailable</h2>
+          <p className="mt-3 text-sm leading-6 text-fog">
+            The workspace data could not be loaded. Please check the network connection and try again.
           </p>
         </CardContent>
       </Card>

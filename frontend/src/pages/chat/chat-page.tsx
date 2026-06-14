@@ -96,7 +96,7 @@ export function ChatPage() {
   const currentChatroom = chatrooms?.find((c) => c.id === chatroomId)
 
   return (
-    <PageContainer className="flex min-h-0 overflow-hidden">
+    <PageContainer className="flex min-h-0 overflow-hidden bg-[#36393f] p-0">
       <ChatroomSidebar
         chatrooms={chatrooms || []}
         currentChatroomId={chatroomId}
@@ -105,28 +105,28 @@ export function ChatPage() {
         isCreating={createChatroom.isPending}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col bg-[#36393f]">
         <ErrorBoundary>
         {chatroomId ? (
           <>
             {/* Chat Header */}
-            <div className="flex items-center gap-2 border-b px-4 py-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium">
+            <div className="flex h-14 items-center gap-2 border-b border-void/50 px-4 bg-[#36393f]">
+              <span className="text-[#8e9297] text-xl font-normal select-none">
                 #
               </span>
-              <h2 className="font-semibold">{currentChatroom?.name || 'Chat'}</h2>
+              <h2 className="text-base font-bold text-snow font-ginto">{currentChatroom?.name || 'chat'}</h2>
               {currentChatroom?.description && (
                 <>
-                  <span className="text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">{currentChatroom.description}</span>
+                  <span className="text-dim-grey">•</span>
+                  <span className="text-xs text-greyple font-medium">{currentChatroom.description}</span>
                 </>
               )}
               <div className="ml-auto flex items-center gap-2">
                 <span className={cn(
                   'h-2 w-2 rounded-full',
-                  isConnected ? 'bg-green-500' : 'bg-muted'
+                  isConnected ? 'bg-spring-green' : 'bg-dim-grey'
                 )} />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-greyple font-semibold">
                   {isConnected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
@@ -135,7 +135,7 @@ export function ChatPage() {
             {/* Messages */}
             {historyLoading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="text-muted-foreground">Loading messages...</div>
+                <div className="text-greyple text-sm font-semibold animate-pulse">Loading chat log...</div>
               </div>
             ) : (
               <MessageList
@@ -155,10 +155,11 @@ export function ChatPage() {
             />
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold">Welcome to Chat</h3>
-              <p className="text-muted-foreground">Select a chatroom to start messaging</p>
+          <div className="flex flex-1 items-center justify-center bg-[#36393f]">
+            <div className="text-center space-y-2 max-w-sm px-6">
+              <div className="w-16 h-16 rounded-full bg-void flex items-center justify-center text-3xl font-black text-snow mx-auto mb-4">#</div>
+              <h3 className="text-xl font-extrabold font-ginto-nord text-snow uppercase">Welcome to Chat!</h3>
+              <p className="text-sm text-greyple font-medium">Select one of the channels from the sidebar or create a new one to start talking with members.</p>
             </div>
           </div>
         )}
